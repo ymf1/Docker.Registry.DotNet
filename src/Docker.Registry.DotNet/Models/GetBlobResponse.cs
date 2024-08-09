@@ -13,24 +13,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
-using System.IO;
+namespace Docker.Registry.DotNet.Models;
 
-namespace Docker.Registry.DotNet.Models
+public class GetBlobResponse : BlobHeader, IDisposable
 {
-    public class GetBlobResponse : BlobHeader, IDisposable
+    internal GetBlobResponse(string dockerContentDigest, Stream stream)
+        : base(dockerContentDigest)
     {
-        internal GetBlobResponse(string dockerContentDigest, Stream stream)
-            : base(dockerContentDigest)
-        {
             this.Stream = stream;
         }
 
-        public Stream Stream { get; }
+    public Stream Stream { get; }
 
-        public void Dispose()
-        {
+    public void Dispose()
+    {
             this.Stream?.Dispose();
         }
-    }
 }

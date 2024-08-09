@@ -13,116 +13,105 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
+namespace Docker.Registry.DotNet.Helpers;
 
-using Docker.Registry.DotNet.Registry;
-
-using JetBrains.Annotations;
-
-namespace Docker.Registry.DotNet.Helpers
+internal static class HttpUtility
 {
-    internal static class HttpUtility
+    internal static Uri BuildUri(this Uri baseUri, string path, IQueryString? queryString)
     {
-        internal static Uri BuildUri(this Uri baseUri, string path, IQueryString queryString)
+        if (baseUri == null) throw new ArgumentNullException(nameof(baseUri));
+
+        var pathIsUri = Uri.TryCreate(path, UriKind.Absolute, out Uri uri);
+
+        if (!pathIsUri)
+            uri = baseUri;
+
+        var builder = new UriBuilder(uri);
+
+        if (!pathIsUri && !string.IsNullOrEmpty(path)) builder.Path += path;
+
+        if (queryString != null)
         {
-            if (baseUri == null) throw new ArgumentNullException(nameof(baseUri));
-
-            var pathIsUri = Uri.TryCreate(path, UriKind.Absolute, out Uri uri);
-
-            if (!pathIsUri)
-                uri = baseUri;
-
-            var builder = new UriBuilder(uri);
-
-            if (!pathIsUri && !string.IsNullOrEmpty(path)) builder.Path += path;
-
-            if (queryString != null)
-            {
-                if (string.IsNullOrWhiteSpace(builder.Query))
-                    builder.Query = queryString.GetQueryString();
-                else
-                    builder.Query += "&" + queryString.GetQueryString();
-            }
-
-            return builder.Uri;
+            if (string.IsNullOrWhiteSpace(builder.Query))
+                builder.Query = queryString.GetQueryString();
+            else
+                builder.Query += "&" + queryString.GetQueryString();
         }
 
-        /// <summary>
-        ///     Attempts to retrieve the value of a response header.
-        /// </summary>
-        /// <param name="response"></param>
-        /// <param name="name"></param>
-        /// <returns>The first value if one is found, null otherwise.</returns>
-        public static string GetHeader([NotNull] this RegistryApiResponse response, string name)
-        {
-            if (response == null) throw new ArgumentNullException(nameof(response));
+        return builder.Uri;
+    }
 
-            return response.Headers
-                .FirstOrDefault(h => h.Key.Equals(name, StringComparison.OrdinalIgnoreCase)).Value
-                ?.FirstOrDefault();
-        }
+    /// <summary>
+    ///     Attempts to retrieve the value of a response header.
+    /// </summary>
+    /// <param name="response"></param>
+    /// <param name="name"></param>
+    /// <returns>The first value if one is found, null otherwise.</returns>
+    public static string GetHeader(this RegistryApiResponse response, string name)
+    {
+        if (response == null) throw new ArgumentNullException(nameof(response));
 
-        /// <summary>
-        ///     Attempts to retrieve the value of a response header.
-        /// </summary>
-        /// <param name="headers"></param>
-        /// <param name="name"></param>
-        /// <returns>The first value if one is found, null otherwise.</returns>
-        public static string[] GetHeaders(
-            this IEnumerable<KeyValuePair<string, string[]>> headers,
-            string name)
-        {
-            return headers
-                .IfNullEmpty()
-                .Where(h => h.Key == name)
-                .Select(h => h.Value?.FirstOrDefault())
-                .ToArray();
-        }
+        return response.Headers
+            .FirstOrDefault(h => h.Key.Equals(name, StringComparison.OrdinalIgnoreCase)).Value
+            ?.FirstOrDefault();
+    }
 
-        public static void AddRange(
-            [NotNull] this HttpRequestHeaders header,
-            IEnumerable<KeyValuePair<string, string>> headers)
-        {
-            if (header == null) throw new ArgumentNullException(nameof(header));
+    /// <summary>
+    ///     Attempts to retrieve the value of a response header.
+    /// </summary>
+    /// <param name="headers"></param>
+    /// <param name="name"></param>
+    /// <returns>The first value if one is found, null otherwise.</returns>
+    public static string[] GetHeaders(
+        this IEnumerable<KeyValuePair<string, string[]>> headers,
+        string name)
+    {
+        return headers
+            .IfNullEmpty()
+            .Where(h => h.Key == name)
+            .Select(h => h.Value?.FirstOrDefault())
+            .ToArray();
+    }
 
-            foreach (var item in headers.IfNullEmpty()) header.Add(item.Key, item.Value);
-        }
+    public static void AddRange(
+        this HttpRequestHeaders header,
+        IEnumerable<KeyValuePair<string, string>>? headers)
+    {
+        if (header == null) throw new ArgumentNullException(nameof(header));
 
-        public static AuthenticationHeaderValue GetHeaderBySchema(
-            [NotNull] this HttpResponseMessage response,
-            string schema)
-        {
-            if (response == null) throw new ArgumentNullException(nameof(response));
+        foreach (var item in headers.IfNullEmpty()) header.Add(item.Key, item.Value);
+    }
 
-            return response.Headers.WwwAuthenticate.FirstOrDefault(s => s.Scheme == schema);
-        }
+    public static AuthenticationHeaderValue GetHeaderBySchema(
+        this HttpResponseMessage response,
+        string schema)
+    {
+        if (response == null) throw new ArgumentNullException(nameof(response));
 
-        public static int? GetContentLength([NotNull] this HttpResponseHeaders responseHeaders)
-        {
-            if (responseHeaders == null) throw new ArgumentNullException(nameof(responseHeaders));
+        return response.Headers.WwwAuthenticate.FirstOrDefault(s => s.Scheme == schema);
+    }
 
-            if (!responseHeaders.TryGetValues("Content-Length", out var values)) return null;
+    public static int? GetContentLength(this HttpResponseHeaders responseHeaders)
+    {
+        if (responseHeaders == null) throw new ArgumentNullException(nameof(responseHeaders));
 
-            var raw = values.FirstOrDefault();
+        if (!responseHeaders.TryGetValues("Content-Length", out var values)) return null;
 
-            if (int.TryParse(raw, out var parsed)) return parsed;
+        var raw = values.FirstOrDefault();
 
-            return null;
-        }
+        if (int.TryParse(raw, out var parsed)) return parsed;
 
-        public static string GetString(
-            [NotNull] this HttpResponseHeaders responseHeaders,
-            string name)
-        {
-            if (responseHeaders == null) throw new ArgumentNullException(nameof(responseHeaders));
+        return null;
+    }
 
-            if (!responseHeaders.TryGetValues(name, out var values)) return null;
+    public static string GetString(
+        this HttpResponseHeaders responseHeaders,
+        string name)
+    {
+        if (responseHeaders == null) throw new ArgumentNullException(nameof(responseHeaders));
 
-            return values.FirstOrDefault();
-        }
+        if (!responseHeaders.TryGetValues(name, out var values)) return null;
+
+        return values.FirstOrDefault();
     }
 }

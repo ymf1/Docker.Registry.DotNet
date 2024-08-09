@@ -13,10 +13,9 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-namespace Docker.Registry.DotNet.Helpers
+namespace Docker.Registry.DotNet.Helpers;
+
+internal interface IQueryString
 {
-    internal interface IQueryString
-    {
-        string GetQueryString();
-    }
+    string GetQueryString();
 }

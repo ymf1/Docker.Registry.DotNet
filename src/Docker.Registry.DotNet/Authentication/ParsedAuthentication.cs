@@ -13,21 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-namespace Docker.Registry.DotNet.Authentication
+namespace Docker.Registry.DotNet.Authentication;
+
+internal class ParsedAuthentication(string realm, string service, string scope)
 {
-    internal class ParsedAuthentication
-    {
-        public ParsedAuthentication(string realm, string service, string scope)
-        {
-            Realm = realm;
-            Service = service;
-            Scope = scope;
-        }
+    public string Realm { get; } = realm;
 
-        public string Realm { get; }
+    public string Service { get; } = service;
 
-        public string Service { get; }
-
-        public string Scope { get; }
-    }
+    public string Scope { get; } = scope;
 }

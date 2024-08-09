@@ -13,33 +13,17 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
-using Docker.Registry.DotNet.Helpers;
-using Docker.Registry.DotNet.Models;
-using Docker.Registry.DotNet.Registry;
-
-using JetBrains.Annotations;
-
-namespace Docker.Registry.DotNet.Endpoints.Implementations
+internal class TagOperations(NetworkClient client) : ITagOperations
 {
-    internal class TagOperations : ITagOperations
+    private readonly NetworkClient _client = client ?? throw new ArgumentNullException(nameof(client));
+
+    public async Task<ListImageTagsResponse> ListImageTagsAsync(
+        string name,
+        ListImageTagsParameters? parameters = null,
+        CancellationToken cancellationToken = default)
     {
-        private readonly NetworkClient _client;
-
-        public TagOperations([NotNull] NetworkClient client)
-        {
-            this._client = client ?? throw new ArgumentNullException(nameof(client));
-        }
-
-        public async Task<ListImageTagsResponse> ListImageTagsAsync(
-            string name,
-            ListImageTagsParameters parameters = null,
-            CancellationToken cancellationToken = default)
-        {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentException(
                     $"'{nameof(name)}' cannot be null or empty",
@@ -60,5 +44,4 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
             return this._client.JsonSerializer.DeserializeObject<ListImageTagsResponse>(
                 response.Body);
         }
-    }
 }

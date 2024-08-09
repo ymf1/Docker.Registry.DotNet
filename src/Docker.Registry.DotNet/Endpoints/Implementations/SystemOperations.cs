@@ -13,26 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
-using Docker.Registry.DotNet.Registry;
-
-namespace Docker.Registry.DotNet.Endpoints.Implementations
+internal class SystemOperations(NetworkClient client) : ISystemOperations
 {
-    internal class SystemOperations : ISystemOperations
+    public Task PingAsync(CancellationToken cancellationToken = default)
     {
-        private readonly NetworkClient _client;
-
-        public SystemOperations(NetworkClient client)
-        {
-            this._client = client;
+            return client.MakeRequestAsync(cancellationToken, HttpMethod.Get, "v2/");
         }
-
-        public Task PingAsync(CancellationToken cancellationToken = default)
-        {
-            return this._client.MakeRequestAsync(cancellationToken, HttpMethod.Get, "v2/");
-        }
-    }
 }

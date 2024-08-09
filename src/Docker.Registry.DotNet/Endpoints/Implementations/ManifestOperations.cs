@@ -13,38 +13,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Runtime.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
+namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
-using Docker.Registry.DotNet.Helpers;
-using Docker.Registry.DotNet.Models;
-using Docker.Registry.DotNet.Registry;
-
-using JetBrains.Annotations;
-
-using Newtonsoft.Json;
-
-namespace Docker.Registry.DotNet.Endpoints.Implementations
+internal class ManifestOperations(NetworkClient client) : IManifestOperations
 {
-    internal class ManifestOperations : IManifestOperations
+    public async Task<GetImageManifestResult> GetManifestAsync(
+        string name,
+        string reference,
+        CancellationToken cancellationToken = default)
     {
-        private readonly NetworkClient _client;
-
-        public ManifestOperations(NetworkClient client)
-        {
-            this._client = client;
-        }
-
-        public async Task<GetImageManifestResult> GetManifestAsync(
-            string name,
-            string reference,
-            CancellationToken cancellationToken = default)
-        {
             var headers = new Dictionary<string, string>
             {
                 {
@@ -53,7 +30,7 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
                 }
             };
 
-            var response = await this._client.MakeRequestAsync(
+            var response = await client.MakeRequestAsync(
                 cancellationToken,
                 HttpMethod.Head,
                 $"v2/{name}/manifests/{reference}",
@@ -62,7 +39,7 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
 
             var digestReference = response.GetHeader("Docker-Content-Digest");
 
-            response = await this._client.MakeRequestAsync(
+            response = await client.MakeRequestAsync(
                 cancellationToken,
                 HttpMethod.Get,
                 $"v2/{name}/manifests/{digestReference}",
@@ -77,7 +54,7 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
                 case ManifestMediaTypes.ManifestSchema1Signed:
                     return new GetImageManifestResult(
                         contentType,
-                        this._client.JsonSerializer.DeserializeObject<ImageManifest2_1>(
+                        client.JsonSerializer.DeserializeObject<ImageManifest2_1>(
                             response.Body),
                         response.Body)
                     {
@@ -88,7 +65,7 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
                 case ManifestMediaTypes.ManifestSchema2:
                     return new GetImageManifestResult(
                         contentType,
-                        this._client.JsonSerializer.DeserializeObject<ImageManifest2_2>(
+                        client.JsonSerializer.DeserializeObject<ImageManifest2_2>(
                             response.Body),
                         response.Body)
                     {
@@ -98,7 +75,7 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
                 case ManifestMediaTypes.ManifestList:
                     return new GetImageManifestResult(
                         contentType,
-                        this._client.JsonSerializer.DeserializeObject<ManifestList>(response.Body),
+                        client.JsonSerializer.DeserializeObject<ManifestList>(response.Body),
                         response.Body);
 
                 default:
@@ -106,12 +83,12 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
             }
         }
 
-        public async Task<PushManifestResponse> PutManifestAsync(
-            string name,
-            string reference,
-            ImageManifest manifest,
-            CancellationToken cancellationToken)
-        {
+    public async Task<PushManifestResponse> PutManifestAsync(
+        string name,
+        string reference,
+        ImageManifest manifest,
+        CancellationToken cancellationToken)
+    {
             string manifestMediaType = null;
             if (manifest is ImageManifest2_1)
                 manifestMediaType = ManifestMediaTypes.ManifestSchema1;
@@ -120,14 +97,14 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
             if (manifest is ManifestList)
                 manifestMediaType = ManifestMediaTypes.ManifestList;
 
-            var response = await this._client.MakeRequestAsync(
+            var response = await client.MakeRequestAsync(
                 cancellationToken,
                 HttpMethod.Put,
                 $"v2/{name}/manifests/{reference}",
                 content: () =>
                 {
                     var content = new StringContent(
-                        this._client.JsonSerializer.SerializeObject(manifest));
+                        client.JsonSerializer.SerializeObject(manifest));
                     content.Headers.ContentType =
                         new MediaTypeHeaderValue(manifestMediaType);
                     return content;
@@ -141,23 +118,23 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
             };
         }
 
-        //public Task<bool> DoesManifestExistAsync(string name, string reference, CancellationToken cancellation = default)
-        //{
-        //    throw new NotImplementedException();
-        //}
+    //public Task<bool> DoesManifestExistAsync(string name, string reference, CancellationToken cancellation = default)
+    //{
+    //    throw new NotImplementedException();
+    //}
 
-        public async Task DeleteManifestAsync(
-            string name,
-            string reference,
-            CancellationToken cancellationToken = default)
-        {
+    public async Task DeleteManifestAsync(
+        string name,
+        string reference,
+        CancellationToken cancellationToken = default)
+    {
             var path = $"v2/{name}/manifests/{reference}";
 
-            await this._client.MakeRequestAsync(cancellationToken, HttpMethod.Delete, path);
+            await client.MakeRequestAsync(cancellationToken, HttpMethod.Delete, path);
         }
 
-        private string GetContentType(string contentTypeHeader, string manifest)
-        {
+    private string GetContentType(string contentTypeHeader, string manifest)
+    {
             if (!string.IsNullOrWhiteSpace(contentTypeHeader))
                 return contentTypeHeader;
 
@@ -176,12 +153,12 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
                 $"Unable to determine schema type from version {check.SchemaVersion}");
         }
 
-        [PublicAPI]
-        public async Task<string> GetManifestRawAsync(
-            string name,
-            string reference,
-            CancellationToken cancellationToken)
-        {
+    [PublicAPI]
+    public async Task<string> GetManifestRawAsync(
+        string name,
+        string reference,
+        CancellationToken cancellationToken)
+    {
             var headers = new Dictionary<string, string>
             {
                 {
@@ -190,7 +167,7 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
                 }
             };
 
-            var response = await this._client.MakeRequestAsync(
+            var response = await client.MakeRequestAsync(
                 cancellationToken,
                 HttpMethod.Get,
                 $"v2/{name}/manifests/{reference}",
@@ -200,16 +177,15 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
             return response.Body;
         }
 
-        private class SchemaCheck
-        {
-            /// <summary>
-            ///     This field specifies the image manifest schema version as an integer.
-            /// </summary>
-            [DataMember(Name = "schemaVersion")]
-            public int? SchemaVersion { get; set; }
+    private class SchemaCheck
+    {
+        /// <summary>
+        ///     This field specifies the image manifest schema version as an integer.
+        /// </summary>
+        [DataMember(Name = "schemaVersion")]
+        public int? SchemaVersion { get; set; }
 
-            [DataMember(Name = "mediaType")]
-            public string MediaType { get; set; }
-        }
+        [DataMember(Name = "mediaType")]
+        public string? MediaType { get; set; }
     }
 }

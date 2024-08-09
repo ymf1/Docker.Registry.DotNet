@@ -13,25 +13,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using Docker.Registry.DotNet.QueryParameters;
+namespace Docker.Registry.DotNet.Models;
 
-using JetBrains.Annotations;
-
-namespace Docker.Registry.DotNet.Models
+[PublicAPI]
+public class CatalogParameters
 {
-    [PublicAPI]
-    public class CatalogParameters
-    {
-        /// <summary>
-        ///     Limit the number of entries in each response. It not present, all entries will be returned
-        /// </summary>
-        [QueryParameter("n")]
-        public int? Number { get; set; }
+    /// <summary>
+    ///     Limit the number of entries in each response. It not present, all entries will be returned
+    /// </summary>
+    [QueryParameter("n")]
+    public int? Number { get; set; }
 
-        /// <summary>
-        ///     Result set will include values lexically after last.
-        /// </summary>
-        [QueryParameter("last")]
-        public int? Last { get; set; }
-    }
+    /// <summary>
+    ///     Result set will include values lexically after last.
+    /// </summary>
+    [QueryParameter("last")]
+    public int? Last { get; set; }
 }

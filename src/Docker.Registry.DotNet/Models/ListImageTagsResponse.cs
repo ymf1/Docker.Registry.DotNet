@@ -13,17 +13,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System.Runtime.Serialization;
+namespace Docker.Registry.DotNet.Models;
 
-namespace Docker.Registry.DotNet.Models
+[DataContract]
+public class ListImageTagsResponse
 {
-    [DataContract]
-    public class ListImageTagsResponse
-    {
-        [DataMember(Name = "name")]
-        public string Name { get; set; }
+    [DataMember(Name = "name")]
+    public string? Name { get; set; }
 
-        [DataMember(Name = "tags")]
-        public string[] Tags { get; set; }
-    }
+    [DataMember(Name = "tags")]
+    public string[]? Tags { get; set; }
 }

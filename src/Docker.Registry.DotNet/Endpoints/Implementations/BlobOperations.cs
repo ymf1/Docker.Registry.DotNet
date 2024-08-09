@@ -13,34 +13,18 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
-using Docker.Registry.DotNet.Helpers;
-using Docker.Registry.DotNet.Models;
-using Docker.Registry.DotNet.Registry;
-
-namespace Docker.Registry.DotNet.Endpoints.Implementations
+internal class BlobOperations(NetworkClient client) : IBlobOperations
 {
-    internal class BlobOperations : IBlobOperations
+    public async Task<GetBlobResponse> GetBlobAsync(
+        string name,
+        string digest,
+        CancellationToken cancellationToken = default)
     {
-        private readonly NetworkClient _client;
-
-        public BlobOperations(NetworkClient client)
-        {
-            this._client = client;
-        }
-
-        public async Task<GetBlobResponse> GetBlobAsync(
-            string name,
-            string digest,
-            CancellationToken cancellationToken = default)
-        {
             var url = $"v2/{name}/blobs/{digest}";
 
-            var response = await this._client.MakeRequestForStreamedResponseAsync(
+            var response = await client.MakeRequestForStreamedResponseAsync(
                 cancellationToken,
                 HttpMethod.Get,
                 url);
@@ -50,32 +34,31 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
                 response.Body);
         }
 
-        public Task DeleteBlobAsync(
-            string name,
-            string digest,
-            CancellationToken cancellationToken = default)
-        {
+    public Task DeleteBlobAsync(
+        string name,
+        string digest,
+        CancellationToken cancellationToken = default)
+    {
             var url = $"v2/{name}/blobs/{digest}";
 
-            return this._client.MakeRequestAsync(cancellationToken, HttpMethod.Delete, url);
+            return client.MakeRequestAsync(cancellationToken, HttpMethod.Delete, url);
         }
 
-        public async Task<bool> IsExistBlobAsync(
-            string name,
-            string digest,
-            CancellationToken cancellationToken = default)
-        {
+    public async Task<bool> IsExistBlobAsync(
+        string name,
+        string digest,
+        CancellationToken cancellationToken = default)
+    {
             var path = $"v2/{name}/blobs/{digest}";
 
-            var response = await this._client.MakeRequestNotErrorAsync(
+            var response = await client.MakeRequestNotErrorAsync(
                 cancellationToken,
                 HttpMethod.Head,
                 path);
 
             if (response.StatusCode != HttpStatusCode.NotFound)
-                this._client.HandleIfErrorResponse(response);
+                client.HandleIfErrorResponse(response);
 
             return response.StatusCode == HttpStatusCode.OK;
         }
-    }
 }

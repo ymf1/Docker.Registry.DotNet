@@ -13,14 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-namespace Docker.Registry.DotNet.Models
+namespace Docker.Registry.DotNet.Models;
+
+public class InitiateMonolithicUploadResponse
 {
-    public class InitiateMonolithicUploadResponse
-    {
-        public string Location { get; set; }
+    public string? Location { get; set; }
 
-        public int ContentLength { get; set; }
+    public int ContentLength { get; set; }
 
-        public string DockerUploadUuid { get; set; }
-    }
+    public string? DockerUploadUuid { get; set; }
 }

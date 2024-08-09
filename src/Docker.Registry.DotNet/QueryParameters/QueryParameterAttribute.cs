@@ -13,18 +13,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
+namespace Docker.Registry.DotNet.QueryParameters;
 
-namespace Docker.Registry.DotNet.QueryParameters
+[AttributeUsage(AttributeTargets.Property)]
+internal class QueryParameterAttribute(string key) : Attribute
 {
-    [AttributeUsage(AttributeTargets.Property)]
-    internal class QueryParameterAttribute : Attribute
-    {
-        public QueryParameterAttribute(string key)
-        {
-            this.Key = key;
-        }
-
-        public string Key { get; }
-    }
+    public string Key { get; } = key;
 }

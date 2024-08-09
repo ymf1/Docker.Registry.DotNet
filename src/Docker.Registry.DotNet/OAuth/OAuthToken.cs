@@ -13,24 +13,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
-using System.Runtime.Serialization;
+namespace Docker.Registry.DotNet.OAuth;
 
-namespace Docker.Registry.DotNet.OAuth
+[DataContract]
+internal class OAuthToken
 {
-    [DataContract]
-    internal class OAuthToken
-    {
-        [DataMember(Name = "token")]
-        public string Token { get; set; }
+    [DataMember(Name = "token")]
+    public string? Token { get; set; }
 
-        [DataMember(Name = "access_token")]
-        public string AccessToken { get; set; }
+    [DataMember(Name = "access_token")]
+    public string? AccessToken { get; set; }
 
-        [DataMember(Name = "expires_in")]
-        public int ExpiresIn { get; set; }
+    [DataMember(Name = "expires_in")]
+    public int ExpiresIn { get; set; }
 
-        [DataMember(Name = "issued_at")]
-        public DateTime IssuedAt { get; set; }
-    }
+    [DataMember(Name = "issued_at")]
+    public DateTime IssuedAt { get; set; }
 }

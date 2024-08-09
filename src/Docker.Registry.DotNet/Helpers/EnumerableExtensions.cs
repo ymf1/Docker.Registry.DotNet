@@ -13,16 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System.Collections.Generic;
-using System.Linq;
+namespace Docker.Registry.DotNet.Helpers;
 
-namespace Docker.Registry.DotNet.Helpers
+public static class EnumerableExtensions
 {
-    public static class EnumerableExtensions
+    public static IEnumerable<T> IfNullEmpty<T>(this IEnumerable<T>? enumerable)
     {
-        public static IEnumerable<T> IfNullEmpty<T>(this IEnumerable<T> enumerable)
-        {
-            return enumerable ?? Enumerable.Empty<T>();
+            return enumerable ?? [];
         }
-    }
 }

@@ -1,4 +1,4 @@
-﻿//  Copyright 2017-2022 Rich Quackenbush, Jaben Cargman
+﻿//  Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
 //  and Docker.Registry.DotNet Contributors
 // 
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,50 +13,31 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
+namespace Docker.Registry.DotNet.Authentication;
 
-using JetBrains.Annotations;
-
-namespace Docker.Registry.DotNet.Authentication
+[PublicAPI]
+public class BasicAuthenticationProvider(string username, string password) : AuthenticationProvider
 {
-    [PublicAPI]
-    public class BasicAuthenticationProvider : AuthenticationProvider
+    private static string Schema { get; } = "Basic";
+
+    public override Task AuthenticateAsync(HttpRequestMessage request)
     {
-        private readonly string _password;
+        return Task.CompletedTask;
+    }
 
-        private readonly string _username;
+    public override Task AuthenticateAsync(
+        HttpRequestMessage request,
+        HttpResponseMessage response)
+    {
+        this.TryGetSchemaHeader(response, Schema);
 
-        public BasicAuthenticationProvider(string username, string password)
-        {
-            this._username = username;
-            this._password = password;
-        }
+        var passBytes = Encoding.UTF8.GetBytes($"{username}:{password}");
+        var base64Pass = Convert.ToBase64String(passBytes);
 
-        private static string Schema { get; } = "Basic";
+        //Set the header
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue(Schema, base64Pass);
 
-        public override Task AuthenticateAsync(HttpRequestMessage request)
-        {
-            return Task.CompletedTask;
-        }
-
-        public override Task AuthenticateAsync(
-            HttpRequestMessage request,
-            HttpResponseMessage response)
-        {
-            this.TryGetSchemaHeader(response, Schema);
-
-            var passBytes = Encoding.UTF8.GetBytes($"{this._username}:{this._password}");
-            var base64Pass = Convert.ToBase64String(passBytes);
-
-            //Set the header
-            request.Headers.Authorization =
-                new AuthenticationHeaderValue(Schema, base64Pass);
-
-            return Task.CompletedTask;
-        }
+        return Task.CompletedTask;
     }
 }

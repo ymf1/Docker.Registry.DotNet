@@ -13,18 +13,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System.Collections.Generic;
-using System.Linq;
+namespace Docker.Registry.DotNet.Helpers;
 
-namespace Docker.Registry.DotNet.Helpers
+public static class StringExtensions
 {
-    public static class StringExtensions
+    public static string ToDelimitedString(
+        this IEnumerable<string> strings,
+        string delimiter = "")
     {
-        public static string ToDelimitedString(
-            this IEnumerable<string> strings,
-            string delimiter = "")
-        {
-            return string.Join(delimiter, strings.IfNullEmpty().ToArray());
-        }
+        return string.Join(delimiter, strings.IfNullEmpty().ToArray());
     }
 }

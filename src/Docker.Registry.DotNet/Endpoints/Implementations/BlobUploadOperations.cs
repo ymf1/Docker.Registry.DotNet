@@ -13,33 +13,21 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
+namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
-using Docker.Registry.DotNet.Helpers;
-using Docker.Registry.DotNet.Models;
-using Docker.Registry.DotNet.Registry;
-
-namespace Docker.Registry.DotNet.Endpoints.Implementations
+internal class BlobUploadOperations : IBlobUploadOperations
 {
-    internal class BlobUploadOperations : IBlobUploadOperations
-    {
-        private readonly NetworkClient _client;
+    private readonly NetworkClient _client;
 
-        internal BlobUploadOperations(NetworkClient client)
-        {
+    internal BlobUploadOperations(NetworkClient client)
+    {
             this._client = client;
         }
 
-        public async Task<ResumableUpload> StartUploadBlobAsync(
-            string name,
-            CancellationToken cancellationToken = default)
-        {
+    public async Task<ResumableUpload> StartUploadBlobAsync(
+        string name,
+        CancellationToken cancellationToken = default)
+    {
             var path = $"v2/{name}/blobs/uploads/";
             var response = await this._client.MakeRequestAsync(
                 cancellationToken,
@@ -53,12 +41,12 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
             };
         }
 
-        public Task<CompletedUploadResponse> MonolithicUploadBlobAsync(
-            ResumableUpload resumable,
-            string digest,
-            Stream stream,
-            CancellationToken cancellationToken = default)
-        {
+    public Task<CompletedUploadResponse> MonolithicUploadBlobAsync(
+        ResumableUpload resumable,
+        string digest,
+        Stream stream,
+        CancellationToken cancellationToken = default)
+    {
             return CompleteBlobUploadAsync(
                 resumable,
                 digest,
@@ -66,19 +54,19 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
                 cancellationToken: cancellationToken);
         }
 
-        public Task<ResumableUpload> InitiateBlobUploadAsync(
-            string name,
-            Stream stream = null,
-            CancellationToken cancellationToken = default)
-        {
+    public Task<ResumableUpload> InitiateBlobUploadAsync(
+        string name,
+        Stream? stream = null,
+        CancellationToken cancellationToken = default)
+    {
             throw new NotImplementedException();
         }
 
-        public async Task<MountResponse> MountBlobAsync(
-            string name,
-            MountParameters parameters,
-            CancellationToken cancellationToken = default)
-        {
+    public async Task<MountResponse> MountBlobAsync(
+        string name,
+        MountParameters parameters,
+        CancellationToken cancellationToken = default)
+    {
             var queryString = new QueryString();
             queryString.Add("mount", parameters.Digest);
             queryString.Add("from", parameters.From);
@@ -96,11 +84,11 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
             };
         }
 
-        public async Task<BlobUploadStatus> GetBlobUploadStatus(
-            string name,
-            string uuid,
-            CancellationToken cancellationToken = default)
-        {
+    public async Task<BlobUploadStatus> GetBlobUploadStatus(
+        string name,
+        string uuid,
+        CancellationToken cancellationToken = default)
+    {
             var response = await this._client.MakeRequestAsync(
                 cancellationToken,
                 HttpMethod.Get,
@@ -113,13 +101,13 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
             };
         }
 
-        public async Task<ResumableUpload> UploadBlobChunkAsync(
-            ResumableUpload resumable,
-            Stream chunk,
-            long? from = null,
-            long? to = null,
-            CancellationToken cancellationToken = default)
-        {
+    public async Task<ResumableUpload> UploadBlobChunkAsync(
+        ResumableUpload resumable,
+        Stream chunk,
+        long? from = null,
+        long? to = null,
+        CancellationToken cancellationToken = default)
+    {
             var response = await this._client.MakeRequestAsync(
                 cancellationToken,
                 new HttpMethod("PATCH"),
@@ -144,14 +132,14 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
             };
         }
 
-        public async Task<CompletedUploadResponse> CompleteBlobUploadAsync(
-            ResumableUpload resumable,
-            string digest,
-            Stream chunk = null,
-            long? from = null,
-            long? to = null,
-            CancellationToken cancellationToken = default)
-        {
+    public async Task<CompletedUploadResponse> CompleteBlobUploadAsync(
+        ResumableUpload resumable,
+        string digest,
+        Stream? chunk = null,
+        long? from = null,
+        long? to = null,
+        CancellationToken cancellationToken = default)
+    {
             var queryString = new QueryString();
             queryString.Add("digest", digest);
 
@@ -180,32 +168,32 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
             };
         }
 
-        public Task CancelBlobUploadAsync(
-            string name,
-            string uuid,
-            CancellationToken cancellationToken = default)
-        {
+    public Task CancelBlobUploadAsync(
+        string name,
+        string uuid,
+        CancellationToken cancellationToken = default)
+    {
             var path = $"v2/{name}/blobs/uploads/{uuid}";
 
             return this._client.MakeRequestAsync(cancellationToken, HttpMethod.Delete, path);
         }
 
-        /// <summary>
-        ///     Perform a monolithic upload.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="contentLength"></param>
-        /// <param name="stream"></param>
-        /// <param name="digest"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public async Task UploadBlobAsync(
-            string name,
-            int contentLength,
-            Stream stream,
-            string digest,
-            CancellationToken cancellationToken = default)
-        {
+    /// <summary>
+    ///     Perform a monolithic upload.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="contentLength"></param>
+    /// <param name="stream"></param>
+    /// <param name="digest"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task UploadBlobAsync(
+        string name,
+        int contentLength,
+        Stream stream,
+        string digest,
+        CancellationToken cancellationToken = default)
+    {
             var path = $"v2/{name}/blobs/uploads/";
 
             var response = await this._client.MakeRequestAsync(
@@ -314,5 +302,4 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations
 
             //await _client.MakeRequestAsync(cancellationToken, HttpMethod.Put, location, queryString);
         }
-    }
 }

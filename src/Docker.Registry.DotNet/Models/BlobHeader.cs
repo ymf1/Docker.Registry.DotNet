@@ -13,18 +13,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using JetBrains.Annotations;
+namespace Docker.Registry.DotNet.Models;
 
-namespace Docker.Registry.DotNet.Models
+[PublicAPI]
+public class BlobHeader
 {
-    [PublicAPI]
-    public class BlobHeader
+    internal BlobHeader(string dockerContentDigest)
     {
-        internal BlobHeader(string dockerContentDigest)
-        {
-            this.DockerContentDigest = dockerContentDigest;
-        }
-
-        public string DockerContentDigest { get; }
+        this.DockerContentDigest = dockerContentDigest;
     }
+
+    public string DockerContentDigest { get; }
 }

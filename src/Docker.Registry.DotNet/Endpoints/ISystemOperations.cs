@@ -13,17 +13,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System.Threading;
-using System.Threading.Tasks;
+namespace Docker.Registry.DotNet.Endpoints;
 
-using JetBrains.Annotations;
-
-namespace Docker.Registry.DotNet.Endpoints
+[PublicAPI]
+public interface ISystemOperations
 {
     [PublicAPI]
-    public interface ISystemOperations
-    {
-        [PublicAPI]
-        Task PingAsync(CancellationToken cancellationToken = default);
-    }
+    Task PingAsync(CancellationToken cancellationToken = default);
 }

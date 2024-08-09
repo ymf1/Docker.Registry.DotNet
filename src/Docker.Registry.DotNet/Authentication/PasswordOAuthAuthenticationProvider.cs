@@ -13,42 +13,25 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
+namespace Docker.Registry.DotNet.Authentication;
 
-using Docker.Registry.DotNet.OAuth;
-
-using JetBrains.Annotations;
-
-namespace Docker.Registry.DotNet.Authentication
+[PublicAPI]
+public class PasswordOAuthAuthenticationProvider(string username, string password)
+    : AuthenticationProvider
 {
-    [PublicAPI]
-    public class PasswordOAuthAuthenticationProvider : AuthenticationProvider
+    private readonly OAuthClient _client = new OAuthClient();
+
+    private static string Schema { get; } = "Bearer";
+
+    public override Task AuthenticateAsync(HttpRequestMessage request)
     {
-        private readonly OAuthClient _client = new OAuthClient();
-
-        private readonly string _password;
-
-        private readonly string _username;
-
-        public PasswordOAuthAuthenticationProvider(string username, string password)
-        {
-            this._username = username;
-            this._password = password;
-        }
-
-        private static string Schema { get; } = "Bearer";
-
-        public override Task AuthenticateAsync(HttpRequestMessage request)
-        {
             return Task.CompletedTask;
         }
 
-        public override async Task AuthenticateAsync(
-            HttpRequestMessage request,
-            HttpResponseMessage response)
-        {
+    public override async Task AuthenticateAsync(
+        HttpRequestMessage request,
+        HttpResponseMessage response)
+    {
             var header = this.TryGetSchemaHeader(response, Schema);
 
             //Get the bearer bits
@@ -68,12 +51,11 @@ namespace Docker.Registry.DotNet.Authentication
                 bearerBits.Realm,
                 bearerBits.Service,
                 scope,
-                this._username,
-                this._password);
+                username,
+                password);
 
             //Set the header
             request.Headers.Authorization =
                 new AuthenticationHeaderValue(Schema, token.AccessToken);
         }
-    }
 }

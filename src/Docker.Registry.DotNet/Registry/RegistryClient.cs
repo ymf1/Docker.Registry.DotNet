@@ -13,52 +13,47 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
-
-using Docker.Registry.DotNet.Authentication;
-using Docker.Registry.DotNet.Endpoints;
 using Docker.Registry.DotNet.Endpoints.Implementations;
 
-namespace Docker.Registry.DotNet.Registry
+namespace Docker.Registry.DotNet.Registry;
+
+internal sealed class RegistryClient : IRegistryClient
 {
-    internal sealed class RegistryClient : IRegistryClient
+    private readonly NetworkClient _client;
+
+    public RegistryClient(
+        RegistryClientConfiguration configuration,
+        AuthenticationProvider authenticationProvider)
     {
-        private readonly NetworkClient _client;
+        if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
-        public RegistryClient(
-            RegistryClientConfiguration configuration,
-            AuthenticationProvider authenticationProvider)
-        {
-            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+        if (authenticationProvider == null)
+            throw new ArgumentNullException(nameof(authenticationProvider));
 
-            if (authenticationProvider == null)
-                throw new ArgumentNullException(nameof(authenticationProvider));
+        _client = new NetworkClient(configuration, authenticationProvider);
 
-            _client = new NetworkClient(configuration, authenticationProvider);
+        this.Manifest = new ManifestOperations(_client);
+        this.Catalog = new CatalogOperations(_client);
+        this.Blobs = new BlobOperations(_client);
+        this.BlobUploads = new BlobUploadOperations(_client);
+        this.System = new SystemOperations(_client);
+        this.Tags = new TagOperations(_client);
+    }
 
-            this.Manifest = new ManifestOperations(_client);
-            this.Catalog = new CatalogOperations(_client);
-            this.Blobs = new BlobOperations(_client);
-            this.BlobUploads = new BlobUploadOperations(_client);
-            this.System = new SystemOperations(_client);
-            this.Tags = new TagOperations(_client);
-        }
+    public IBlobUploadOperations BlobUploads { get; }
 
-        public IBlobUploadOperations BlobUploads { get; }
+    public IManifestOperations Manifest { get; }
 
-        public IManifestOperations Manifest { get; }
+    public ICatalogOperations Catalog { get; }
 
-        public ICatalogOperations Catalog { get; }
+    public IBlobOperations Blobs { get; }
 
-        public IBlobOperations Blobs { get; }
+    public ITagOperations Tags { get; }
 
-        public ITagOperations Tags { get; }
+    public ISystemOperations System { get; }
 
-        public ISystemOperations System { get; }
-
-        public void Dispose()
-        {
-            _client?.Dispose();
-        }
+    public void Dispose()
+    {
+        _client?.Dispose();
     }
 }

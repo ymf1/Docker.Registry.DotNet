@@ -13,27 +13,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System.Threading;
-using System.Threading.Tasks;
+namespace Docker.Registry.DotNet.Endpoints;
 
-using Docker.Registry.DotNet.Models;
-
-using JetBrains.Annotations;
-
-namespace Docker.Registry.DotNet.Endpoints
+[PublicAPI]
+public interface ICatalogOperations
 {
+    /// <summary>
+    ///     Retrieve a sorted, json list of repositories available in the registry.
+    /// </summary>
+    /// <param name="parameters"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [PublicAPI]
-    public interface ICatalogOperations
-    {
-        /// <summary>
-        ///     Retrieve a sorted, json list of repositories available in the registry.
-        /// </summary>
-        /// <param name="parameters"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        [PublicAPI]
-        Task<Catalog> GetCatalogAsync(
-            CatalogParameters parameters = null,
-            CancellationToken cancellationToken = default);
-    }
+    Task<Catalog> GetCatalogAsync(
+        CatalogParameters? parameters = null,
+        CancellationToken cancellationToken = default);
 }

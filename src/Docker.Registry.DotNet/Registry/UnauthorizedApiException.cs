@@ -13,16 +13,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-namespace Docker.Registry.DotNet.Registry
+namespace Docker.Registry.DotNet.Registry;
+
+/// <summary>
+///     Thrown when an api response is returned as unauthorized.
+/// </summary>
+public class UnauthorizedApiException : RegistryApiException
 {
-    /// <summary>
-    ///     Thrown when an api response is returned as unauthorized.
-    /// </summary>
-    public class UnauthorizedApiException : RegistryApiException
+    internal UnauthorizedApiException(RegistryApiResponse response)
+        : base(response)
     {
-        internal UnauthorizedApiException(RegistryApiResponse response)
-            : base(response)
-        {
-        }
     }
 }

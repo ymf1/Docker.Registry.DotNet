@@ -13,56 +13,46 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
+namespace Docker.Registry.DotNet.Authentication;
 
-using Docker.Registry.DotNet.Helpers;
-
-namespace Docker.Registry.DotNet.Authentication
+/// <summary>
+///     Authentication provider.
+/// </summary>
+public abstract class AuthenticationProvider
 {
     /// <summary>
-    /// Authentication provider.
+    ///     Called on the initial send
     /// </summary>
-    public abstract class AuthenticationProvider
+    /// <param name="request"></param>
+    /// <returns></returns>
+    public abstract Task AuthenticateAsync(HttpRequestMessage request);
+
+    /// <summary>
+    ///     Called when the send is challenged.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="response"></param>
+    /// <returns></returns>
+    public abstract Task AuthenticateAsync(
+        HttpRequestMessage request,
+        HttpResponseMessage response);
+
+    /// <summary>
+    ///     Gets the schema header from the http response.
+    /// </summary>
+    /// <param name="response"></param>
+    /// <param name="schema"></param>
+    /// <returns></returns>
+    protected AuthenticationHeaderValue TryGetSchemaHeader(
+        HttpResponseMessage response,
+        string schema)
     {
-        /// <summary>
-        /// Called on the initial send
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public abstract Task AuthenticateAsync(HttpRequestMessage request);
+        var header = response.GetHeaderBySchema(schema);
 
-        /// <summary>
-        /// Called when the send is challenged.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="response"></param>
-        /// <returns></returns>
-        public abstract Task AuthenticateAsync(
-            HttpRequestMessage request,
-            HttpResponseMessage response);
+        if (header == null)
+            throw new InvalidOperationException(
+                $"No WWW-Authenticate challenge was found for schema {schema}");
 
-        /// <summary>
-        /// Gets the schema header from the http response.
-        /// </summary>
-        /// <param name="response"></param>
-        /// <param name="schema"></param>
-        /// <returns></returns>
-        protected AuthenticationHeaderValue TryGetSchemaHeader(
-            HttpResponseMessage response,
-            string schema)
-        {
-            var header = response.GetHeaderBySchema(schema);
-
-            if (header == null)
-            {
-                throw new InvalidOperationException(
-                    $"No WWW-Authenticate challenge was found for schema {schema}");
-            }
-
-            return header;
-        }
+        return header;
     }
 }

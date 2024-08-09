@@ -13,30 +13,27 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
+namespace Docker.Registry.DotNet.Registry;
 
-namespace Docker.Registry.DotNet.Registry
+/// <summary>
+///     Thrown when connecting to a registry fails.
+/// </summary>
+public class RegistryConnectionException : Exception
 {
-    /// <summary>
-    ///     Thrown when connecting to a registry fails.
-    /// </summary>
-    public class RegistryConnectionException : Exception
+    /// <inheritdoc />
+    public RegistryConnectionException()
     {
-        /// <inheritdoc />
-        public RegistryConnectionException()
-        {
-        }
+    }
 
-        /// <inheritdoc />
-        public RegistryConnectionException(string message)
-            : base(message)
-        {
-        }
+    /// <inheritdoc />
+    public RegistryConnectionException(string message)
+        : base(message)
+    {
+    }
 
-        /// <inheritdoc />
-        public RegistryConnectionException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+    /// <inheritdoc />
+    public RegistryConnectionException(string message, Exception innerException)
+        : base(message, innerException)
+    {
     }
 }

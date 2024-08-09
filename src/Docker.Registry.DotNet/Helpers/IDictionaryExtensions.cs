@@ -13,16 +13,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
+namespace Docker.Registry.DotNet.Helpers;
 
-namespace Docker.Registry.DotNet.Helpers
+internal static class IDictionaryExtensions
 {
-    internal static class IDictionaryExtensions
+    public static string GetQueryString(this IDictionary<string, string[]> values)
     {
-        public static string GetQueryString(this IDictionary<string, string[]> values)
-        {
             return string.Join(
                 "&",
                 values.Select(
@@ -32,14 +28,13 @@ namespace Docker.Registry.DotNet.Helpers
                             v => $"{Uri.EscapeUriString(pair.Key)}={Uri.EscapeDataString(v)}"))));
         }
 
-        public static TValue GetValueOrDefault<TKey, TValue>(
-            this IDictionary<TKey, TValue> dict,
-            TKey key)
-        {
+    public static TValue GetValueOrDefault<TKey, TValue>(
+        this IDictionary<TKey, TValue> dict,
+        TKey key)
+    {
             if (dict.TryGetValue(key, out var value))
                 return value;
 
             return default;
         }
-    }
 }

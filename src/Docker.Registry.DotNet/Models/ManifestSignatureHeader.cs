@@ -13,14 +13,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System.Runtime.Serialization;
+namespace Docker.Registry.DotNet.Models;
 
-namespace Docker.Registry.DotNet.Models
+[DataContract]
+public class ManifestSignatureHeader
 {
-    [DataContract]
-    public class ManifestSignatureHeader
-    {
-        [DataMember(Name = "alg")]
-        public string Alg { get; set; }
-    }
+    [DataMember(Name = "alg")]
+    public string? Alg { get; set; }
 }

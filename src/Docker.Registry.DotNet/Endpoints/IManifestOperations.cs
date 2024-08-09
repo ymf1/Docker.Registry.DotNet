@@ -13,13 +13,6 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System.Threading;
-using System.Threading.Tasks;
-
-using Docker.Registry.DotNet.Models;
-
-using JetBrains.Annotations;
-
 namespace Docker.Registry.DotNet.Endpoints;
 
 /// <summary>
