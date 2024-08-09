@@ -13,6 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+using Docker.Registry.DotNet.Endpoints.Implementations;
+
 namespace Docker.Registry.DotNet.Registry;
 
 /// <summary>
@@ -55,4 +57,6 @@ public interface IRegistryClient : IDisposable
     /// </summary>
     [PublicAPI]
     ISystemOperations System { get; }
+
+    IRepositoryOperations Repository { get; }
 }

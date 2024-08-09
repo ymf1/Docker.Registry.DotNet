@@ -22,14 +22,15 @@ namespace Docker.Registry.DotNet.Helpers;
 /// </summary>
 internal class JsonSerializer
 {
-    private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
+    private static readonly JsonSerializerSettings Settings = new()
     {
         NullValueHandling = NullValueHandling.Ignore,
         Converters =
         {
             //new JsonIso8601AndUnixEpochDateConverter(),
             //new JsonVersionConverter(),
-            new StringEnumConverter()
+            new StringEnumConverter(),
+            new IsoDateTimeConverter()
             //new TimeSpanSecondsConverter(),
             //new TimeSpanNanosecondsConverter()
         }
@@ -37,11 +38,11 @@ internal class JsonSerializer
 
     public T DeserializeObject<T>(string json)
     {
-            return JsonConvert.DeserializeObject<T>(json, Settings);
-        }
+        return JsonConvert.DeserializeObject<T>(json, Settings);
+    }
 
     public string SerializeObject<T>(T value)
     {
-            return JsonConvert.SerializeObject(value, Settings);
-        }
+        return JsonConvert.SerializeObject(value, Settings);
+    }
 }

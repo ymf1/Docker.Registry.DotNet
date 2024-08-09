@@ -38,7 +38,10 @@ internal sealed class RegistryClient : IRegistryClient
         this.BlobUploads = new BlobUploadOperations(_client);
         this.System = new SystemOperations(_client);
         this.Tags = new TagOperations(_client);
+        this.Repository = new RepositoryOperations(this._client);
     }
+
+    public IRepositoryOperations Repository { get; set; }
 
     public IBlobUploadOperations BlobUploads { get; }
 

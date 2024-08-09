@@ -29,7 +29,8 @@ public class AnonymousOAuthAuthenticationProvider : AuthenticationProvider
 
     public override async Task Authenticate(
         HttpRequestMessage request,
-        HttpResponseMessage response)
+        HttpResponseMessage response,
+        IRegistryUriBuilder uriBuilder)
     {
         var header = this.TryGetSchemaHeader(response, Schema);
 

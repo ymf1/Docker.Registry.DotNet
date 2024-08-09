@@ -82,7 +82,7 @@ internal static class HttpUtility
         foreach (var item in headers.IfNullEmpty()) header.Add(item.Key, item.Value);
     }
 
-    public static AuthenticationHeaderValue GetHeaderBySchema(
+    public static AuthenticationHeaderValue? GetHeaderBySchema(
         this HttpResponseMessage response,
         string schema)
     {

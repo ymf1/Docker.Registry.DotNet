@@ -27,7 +27,8 @@ public class BasicAuthenticationProvider(string username, string password) : Aut
 
     public override Task Authenticate(
         HttpRequestMessage request,
-        HttpResponseMessage response)
+        HttpResponseMessage response,
+        IRegistryUriBuilder uriBuilder)
     {
         this.TryGetSchemaHeader(response, Schema);
 

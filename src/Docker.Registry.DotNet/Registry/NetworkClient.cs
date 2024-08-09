@@ -13,6 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+using System.Diagnostics;
+
 using JsonSerializer = Docker.Registry.DotNet.Helpers.JsonSerializer;
 
 namespace Docker.Registry.DotNet.Registry;
@@ -229,6 +231,8 @@ internal class NetworkClient : IDisposable
 
         var builtUri = this.UriBuilder.Build(path, queryString);
 
+        Debug.WriteLine("Built URI: " + builtUri);
+
         var request = this.PrepareRequest(method, builtUri, headers, content);
 
         if (timeout != InfiniteTimeout)
@@ -252,7 +256,7 @@ internal class NetworkClient : IDisposable
         var request2 = this.PrepareRequest(method, builtUri, headers, content);
 
         //Authenticate given the challenge
-        await this._authenticationProvider.Authenticate(request2, response);
+        await this._authenticationProvider.Authenticate(request2, response, this.UriBuilder);
 
         //Send it again
         response = await this._client.SendAsync(

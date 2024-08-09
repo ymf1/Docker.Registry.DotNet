@@ -36,7 +36,7 @@ internal static class QueryStringExtensions
     /// <param name="readOnlyQueryString"></param>
     /// <param name="key"></param>
     /// <param name="value"></param>
-    internal static void AddIfNotEmpty(this QueryString readOnlyQueryString, string key, string value)
+    internal static void AddIfNotEmpty(this QueryString readOnlyQueryString, string key, string? value)
     {
         if (!string.IsNullOrWhiteSpace(value)) readOnlyQueryString.Add(key, value);
     }

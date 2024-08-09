@@ -23,8 +23,8 @@ internal class OAuthClient
 
     private async Task<OAuthToken?> GetTokenInner(
         string realm,
-        string service,
-        string scope,
+        string? service,
+        string? scope,
         string? username,
         string? password,
         CancellationToken token = default)

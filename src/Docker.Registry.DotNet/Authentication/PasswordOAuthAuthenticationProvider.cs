@@ -19,43 +19,43 @@ namespace Docker.Registry.DotNet.Authentication;
 public class PasswordOAuthAuthenticationProvider(string username, string password)
     : AuthenticationProvider
 {
-    private readonly OAuthClient _client = new OAuthClient();
+    private readonly OAuthClient _client = new();
 
     private static string Schema { get; } = "Bearer";
 
     public override Task Authenticate(HttpRequestMessage request)
     {
-            return Task.CompletedTask;
-        }
+        return Task.CompletedTask;
+    }
 
     public override async Task Authenticate(
         HttpRequestMessage request,
-        HttpResponseMessage response)
+        HttpResponseMessage response,
+        IRegistryUriBuilder uriBuilder)
     {
-            var header = this.TryGetSchemaHeader(response, Schema);
+        var header = this.TryGetSchemaHeader(response, Schema);
 
-            //Get the bearer bits
-            var bearerBits = AuthenticateParser.ParseTyped(header.Parameter);
+        //Get the bearer bits
+        var bearerBits = AuthenticateParser.ParseTyped(header.Parameter);
 
-            string? scope = null;
+        string? scope = null;
 
-            if (!string.IsNullOrWhiteSpace(bearerBits.Scope))
-            {
-                //Also include the repository(plugin) resource type to be able to access plugin repositories.
-                //See https://docs.docker.com/registry/spec/auth/scope/
-                scope = $"{bearerBits.Scope} {bearerBits.Scope?.Replace("repository:", "repository(plugin):")}";
-            }
+        if (!string.IsNullOrWhiteSpace(bearerBits.Scope))
+            //Also include the repository(plugin) resource type to be able to access plugin repositories.
+            //See https://docs.docker.com/registry/spec/auth/scope/
+            scope =
+                $"{bearerBits.Scope} {bearerBits.Scope?.Replace("repository:", "repository(plugin):")}";
 
-            //Get the token
-            var token = await this._client.GetToken(
-                bearerBits.Realm,
-                bearerBits.Service,
-                scope,
-                username,
-                password);
+        //Get the token
+        var token = await this._client.GetToken(
+            bearerBits.Realm,
+            bearerBits.Service,
+            scope,
+            username,
+            password);
 
-            //Set the header
-            request.Headers.Authorization =
-                new AuthenticationHeaderValue(Schema, token.AccessToken);
-        }
+        //Set the header
+        request.Headers.Authorization =
+            new AuthenticationHeaderValue(Schema, token.AccessToken);
+    }
 }

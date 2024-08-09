@@ -32,10 +32,12 @@ public abstract class AuthenticationProvider
     /// </summary>
     /// <param name="request"></param>
     /// <param name="response"></param>
+    /// <param name="builder"></param>
     /// <returns></returns>
     public abstract Task Authenticate(
         HttpRequestMessage request,
-        HttpResponseMessage response);
+        HttpResponseMessage response,
+        IRegistryUriBuilder builder);
 
     /// <summary>
     ///     Gets the schema header from the http response.

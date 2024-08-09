@@ -48,10 +48,10 @@ internal class QueryString : IReadOnlyQueryString
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="instance"></param>
-    public void AddFromObject<T>(T instance)
+    public void AddFromObject<T>(T? instance)
         where T : class
     {
-        if (instance == null) throw new ArgumentNullException(nameof(instance));
+        if (instance == null) return;
 
         var propertyInfos = instance.GetType().GetProperties();
 
