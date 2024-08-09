@@ -32,7 +32,7 @@ public class ImageReferenceTests
 
         imageRef.Should().NotBeNull();
 
-        imageRef.Value.Should().Be(digest.Trim().ToLower());
+        imageRef.Digest?.ToString().Should().Be(digest.Trim().ToLower());
 
         imageRef.IsDigest.Should().BeTrue();
     }
@@ -46,7 +46,7 @@ public class ImageReferenceTests
 
         imageRef.Should().NotBeNull();
 
-        imageRef.Value.Should().Be(tag.Trim());
+        imageRef.Tag?.ToString().Should().Be(tag.Trim());
 
         imageRef.IsTag.Should().BeTrue();
     }
