@@ -228,9 +228,9 @@ internal class NetworkClient : IDisposable
         HttpCompletionOption completionOption,
         HttpMethod method,
         string path,
-        IQueryString queryString,
-        IDictionary<string, string> headers,
-        Func<HttpContent> content,
+        IQueryString? queryString,
+        IDictionary<string, string>? headers,
+        Func<HttpContent>? content,
         CancellationToken cancellationToken)
     {
         await this.EnsureConnection();
@@ -291,9 +291,9 @@ internal class NetworkClient : IDisposable
     internal HttpRequestMessage PrepareRequest(
         HttpMethod method,
         string path,
-        IQueryString queryString,
-        IDictionary<string, string> headers,
-        Func<HttpContent> content)
+        IQueryString? queryString,
+        IDictionary<string, string>? headers,
+        Func<HttpContent>? content)
     {
         if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
 

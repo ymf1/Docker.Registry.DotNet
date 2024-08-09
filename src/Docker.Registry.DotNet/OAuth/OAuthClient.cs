@@ -23,8 +23,8 @@ internal class OAuthClient
         string realm,
         string service,
         string scope,
-        string username,
-        string password,
+        string? username,
+        string? password,
         CancellationToken cancellationToken = default)
     {
         HttpRequestMessage request;
@@ -61,17 +61,16 @@ internal class OAuthClient
             };
         }
 
-        using (var response = await this._client.SendAsync(request, cancellationToken))
-        {
-            if (!response.IsSuccessStatusCode)
-                throw new UnauthorizedAccessException("Unable to authenticate.");
+        using var response = await this._client.SendAsync(request, cancellationToken);
 
-            var body = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+            throw new UnauthorizedAccessException("Unable to authenticate.");
 
-            var token = JsonConvert.DeserializeObject<OAuthToken>(body);
+        var body = await response.Content.ReadAsStringAsync();
 
-            return token;
-        }
+        var token = JsonConvert.DeserializeObject<OAuthToken>(body);
+
+        return token;
     }
 
     public Task<OAuthToken> GetTokenAsync(

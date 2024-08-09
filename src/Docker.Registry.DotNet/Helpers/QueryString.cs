@@ -17,26 +17,26 @@ namespace Docker.Registry.DotNet.Helpers;
 
 internal class QueryString : IQueryString
 {
-    private readonly Dictionary<string, string[]> _values = new Dictionary<string, string[]>();
+    private readonly Dictionary<string, string[]> _values = new();
 
     public string GetQueryString()
     {
-            return string.Join(
-                "&",
-                this._values.Select(
-                    pair => string.Join(
-                        "&",
-                        pair.Value.Select(
-                            v => $"{Uri.EscapeUriString(pair.Key)}={Uri.EscapeDataString(v)}"))));
-        }
+        return string.Join(
+            "&",
+            this._values.Select(
+                pair => string.Join(
+                    "&",
+                    pair.Value.Select(
+                        v => $"{Uri.EscapeUriString(pair.Key)}={Uri.EscapeDataString(v)}"))));
+    }
 
     public void Add(string key, string value)
     {
-            this._values.Add(key, [value]);
-        }
+        this._values.Add(key, [value]);
+    }
 
     public void Add(string key, string[] values)
     {
-            this._values.Add(key, values);
-        }
+        this._values.Add(key, values);
+    }
 }
