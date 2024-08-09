@@ -13,14 +13,21 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+using Docker.Registry.DotNet.Domain.Tags;
+
 namespace Docker.Registry.DotNet.Models;
 
 [DataContract]
-public class ListTagsResponse
+internal class ListTagsResponseDto
 {
     [DataMember(Name = "name")]
     public string? Name { get; set; }
 
     [DataMember(Name = "tags")]
     public IReadOnlyCollection<string> Tags { get; set; } = [];
+}
+
+public record ListTagResponseModel(string Name, IReadOnlyCollection<ImageReference> Tags)
+{
+    public static ListTagResponseModel Empty { get; } = new("", []);
 }

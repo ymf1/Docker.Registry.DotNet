@@ -1,4 +1,4 @@
-﻿//  Copyright 2017-2022 Rich Quackenbush, Jaben Cargman
+﻿// Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
 //  and Docker.Registry.DotNet Contributors
 // 
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +13,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+using Docker.Registry.DotNet.Domain.Tags;
+
 namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
 internal class TagOperations(NetworkClient client) : ITagOperations
 {
-    public async Task<ListTagsResponse> ListTags(
+    public async Task<ListTagResponseModel> ListTags(
         string name,
         ListTagsParameters? parameters = null,
         CancellationToken token = default)
     {
         if (string.IsNullOrEmpty(name))
-            throw new ArgumentException(
-                $"'{nameof(name)}' cannot be null or empty",
-                nameof(name));
+            throw new ArgumentException($"'{nameof(name)}' cannot be null or empty", nameof(name));
 
         parameters ??= new ListTagsParameters();
 
@@ -39,7 +39,12 @@ internal class TagOperations(NetworkClient client) : ITagOperations
             queryString,
             token: token);
 
-        return client.JsonSerializer.DeserializeObject<ListTagsResponse>(
-            response.Body);
+        var listTags = client.JsonSerializer.DeserializeObject<ListTagsResponseDto?>(response.Body);
+
+        return listTags == null
+            ? ListTagResponseModel.Empty
+            : new ListTagResponseModel(
+                listTags.Name ?? string.Empty,
+                listTags.Tags.Select(ImageReference.Create).ToHashSet());
     }
 }

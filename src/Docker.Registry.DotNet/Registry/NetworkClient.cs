@@ -131,7 +131,7 @@ internal class NetworkClient : IDisposable
         HttpMethod method,
         string path,
         IReadOnlyQueryString? queryString = null,
-        IDictionary<string, string>? headers = null,
+        IReadOnlyDictionary<string, string>? headers = null,
         Func<HttpContent>? content = null,
         CancellationToken token = default)
     {
@@ -161,7 +161,7 @@ internal class NetworkClient : IDisposable
         HttpMethod method,
         string path,
         IReadOnlyQueryString? queryString = null,
-        IDictionary<string, string>? headers = null,
+        IReadOnlyDictionary<string, string>? headers = null,
         Func<HttpContent>? content = null,
         CancellationToken token = default)
     {
@@ -220,7 +220,7 @@ internal class NetworkClient : IDisposable
         HttpMethod method,
         string path,
         IReadOnlyQueryString? queryString,
-        IDictionary<string, string>? headers,
+        IReadOnlyDictionary<string, string>? headers,
         Func<HttpContent>? content,
         CancellationToken cancellationToken)
     {
@@ -290,7 +290,7 @@ internal class NetworkClient : IDisposable
     internal HttpRequestMessage PrepareRequest(
         HttpMethod method,
         Uri uri,
-        IDictionary<string, string>? headers,
+        IReadOnlyDictionary<string, string>? headers,
         Func<HttpContent>? content)
     {
         var request = new HttpRequestMessage(

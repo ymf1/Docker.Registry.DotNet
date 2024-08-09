@@ -1,4 +1,4 @@
-﻿//  Copyright 2017-2022 Rich Quackenbush, Jaben Cargman
+﻿// Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
 //  and Docker.Registry.DotNet Contributors
 // 
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,21 +15,12 @@
 
 namespace Docker.Registry.DotNet.Helpers;
 
-public static class StringExtensions
+internal static class CollectionExtensions
 {
-    public static string ToDelimitedString(
-        this IEnumerable<string> strings,
-        string delimiter = "")
+#if !NET5_0_OR_GREATER
+    internal static HashSet<T> ToHashSet<T>(this IEnumerable<T> items)
     {
-        return string.Join(delimiter, strings.IfNullEmpty().ToArray());
+        return [..items];
     }
-
-    public static string? TakeAfter(this string? str, int afterIndex)
-    {
-        if (str == null) return null;
-
-        int strLength = str.Length;
-
-        return afterIndex >= strLength ? str : str.Substring(afterIndex, strLength - afterIndex);
-    }
+#endif
 }

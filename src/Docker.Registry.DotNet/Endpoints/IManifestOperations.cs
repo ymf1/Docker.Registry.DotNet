@@ -1,4 +1,4 @@
-﻿//  Copyright 2017-2022 Rich Quackenbush, Jaben Cargman
+﻿// Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
 //  and Docker.Registry.DotNet Contributors
 // 
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,8 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
+
+using Docker.Registry.DotNet.Domain.Tags;
 
 namespace Docker.Registry.DotNet.Endpoints;
 
@@ -28,10 +30,7 @@ public interface IManifestOperations
     /// <param name="reference"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    Task DeleteManifest(
-        string name,
-        string reference,
-        CancellationToken token = default);
+    Task DeleteManifest(string name, ImageReference reference, CancellationToken token = default);
 
     /// <summary>
     ///     Fetch the manifest identified by name and reference raw.
@@ -40,10 +39,9 @@ public interface IManifestOperations
     /// <param name="reference"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    Task<string> GetManifestRaw(
-        string name,
-        string reference,
-        CancellationToken token);
+    Task<string?> GetManifestRaw(string name, ImageReference reference, CancellationToken token = default);
+
+    Task<ImageReference?> GetDigest(string name, ImageReference reference, CancellationToken token = default);
 
     /// <summary>
     ///     Fetch the manifest identified by name and reference where reference can be a tag or digest. A HEAD request can also
@@ -54,19 +52,7 @@ public interface IManifestOperations
     /// <param name="token"></param>
     /// <returns></returns>
     [PublicAPI]
-    Task<GetImageManifestResult> GetManifest(
-        string name,
-        string reference,
-        CancellationToken token = default);
-
-    ///// <summary>
-    ///// Returns true if the image exists, false otherwise.
-    ///// </summary>
-    ///// <param name="name"></param>
-    ///// <param name="reference"></param>
-    ///// <param name="cancellation"></param>
-    ///// <returns></returns>
-    //Task<bool> DoesManifestExistAsync(string name, string reference, CancellationToken cancellation = default);
+    Task<GetImageManifestResult> GetManifest(string name, ImageReference reference, CancellationToken token = default);
 
     /// <summary>
     ///     Put the manifest identified by name and reference where reference can be a tag or digest.
@@ -78,7 +64,7 @@ public interface IManifestOperations
     /// <returns></returns>
     Task<PushManifestResponse> PutManifest(
         string name,
-        string reference,
+        ImageReference reference,
         ImageManifest manifest,
         CancellationToken token = default);
 }

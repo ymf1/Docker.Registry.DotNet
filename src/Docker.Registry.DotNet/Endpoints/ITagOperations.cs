@@ -19,7 +19,7 @@ namespace Docker.Registry.DotNet.Endpoints;
 public interface ITagOperations
 {
     [PublicAPI]
-    Task<ListTagsResponse> ListTags(
+    Task<ListTagResponseModel> ListTags(
         string name,
         ListTagsParameters? parameters = null,
         CancellationToken token = default);

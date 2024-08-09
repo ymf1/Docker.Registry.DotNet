@@ -1,4 +1,4 @@
-﻿//  Copyright 2017-2022 Rich Quackenbush, Jaben Cargman
+﻿// Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
 //  and Docker.Registry.DotNet Contributors
 // 
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,21 +15,12 @@
 
 namespace Docker.Registry.DotNet.Helpers;
 
-public static class StringExtensions
+internal static class CharHelpers
 {
-    public static string ToDelimitedString(
-        this IEnumerable<string> strings,
-        string delimiter = "")
-    {
-        return string.Join(delimiter, strings.IfNullEmpty().ToArray());
-    }
-
-    public static string? TakeAfter(this string? str, int afterIndex)
-    {
-        if (str == null) return null;
-
-        int strLength = str.Length;
-
-        return afterIndex >= strLength ? str : str.Substring(afterIndex, strLength - afterIndex);
-    }
+    /// <summary>
+    /// Only for lower-case strings
+    /// </summary>
+    /// <param name="c"></param>
+    /// <returns></returns>
+    internal static bool IsHexLowerCase(this char c) => c is >= '0' and <= '9' or >= 'a' and <= 'f';
 }

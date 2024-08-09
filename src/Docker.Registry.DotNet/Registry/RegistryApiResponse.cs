@@ -1,4 +1,4 @@
-﻿//  Copyright 2017-2022 Rich Quackenbush, Jaben Cargman
+﻿// Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
 //  and Docker.Registry.DotNet Contributors
 // 
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,10 +24,7 @@ internal abstract class RegistryApiResponse(HttpStatusCode statusCode, HttpRespo
 
 internal class RegistryApiResponse<TBody> : RegistryApiResponse
 {
-    internal RegistryApiResponse(
-        HttpStatusCode statusCode,
-        TBody? body,
-        HttpResponseHeaders headers)
+    internal RegistryApiResponse(HttpStatusCode statusCode, TBody? body, HttpResponseHeaders headers)
         : base(statusCode, headers)
     {
         this.Body = body;
