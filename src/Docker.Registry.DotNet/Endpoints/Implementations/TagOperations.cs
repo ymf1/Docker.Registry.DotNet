@@ -45,6 +45,39 @@ internal class TagOperations(NetworkClient client) : ITagOperations
             ? ListTagResponseModel.Empty
             : new ListTagResponseModel(
                 listTags.Name ?? string.Empty,
-                listTags.Tags.Select(ImageReference.Create).ToHashSet());
+                listTags.Tags.Select(ImageTag.Create).ToHashSet());
+    }
+
+    public async Task<ListTagByDigestResponseModel> ListTagsByDigests(string name, CancellationToken token = default)
+    {
+        var tags = await this.ListTags(name, token: token);
+
+        var manifestOperations = new ManifestOperations(client);
+
+        var digestLookup = new Dictionary<ImageDigest, HashSet<ImageTag>>();
+
+        var tasks = tags.Tags.Select(async t => (Tag: t, Digest: await manifestOperations.GetDigest(name, t, token)))
+            .ToList();
+
+        var tagDigestList = (await Task.WhenAll(tasks)).Where(s => s.Digest != null).ToList();
+
+        foreach (var item in tagDigestList)
+        {
+            if (item.Digest != null)
+            {
+                if (digestLookup.TryGetValue(item.Digest, out var list))
+                {
+                    list.Add(item.Tag);
+                }
+                else
+                {
+                    digestLookup.Add(item.Digest, [item.Tag]);
+                }
+            }
+        }
+
+        return new ListTagByDigestResponseModel(
+            name,
+            digestLookup.Select(s => new DigestTagModel(s.Key, digestLookup[s.Key].ToHashSet())).ToList());
     }
 }

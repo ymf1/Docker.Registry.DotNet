@@ -24,11 +24,10 @@ namespace Docker.Registry.DotNet.Tests;
 [TestFixture]
 public class ImageReferenceTests
 {
-    [Test]
-    public void ImageReferenceWithDigestShouldWork()
+    [TestCase("   sha256:0d1c30c6bf461513951e4875fe7846f9e2f25fdfec09f4be6b39dbe639d362ca    ")]
+    [TestCase("pipelines@sha256:2ef9a59041a7c4f36001abaec4fe7c10c26c1ead4da11515ba2af346fe60ddac")]
+    public void ImageReferenceWithDigestShouldWork(string digest)
     {
-        string digest = "   sha256:0d1c30c6bf461513951e4875fe7846f9e2f25fdfec09f4be6b39dbe639d362ca    ";
-
         var imageRef = ImageReference.Create(digest);
 
         imageRef.Should().NotBeNull();

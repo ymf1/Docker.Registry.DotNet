@@ -41,7 +41,7 @@ public interface IManifestOperations
     /// <returns></returns>
     Task<string?> GetManifestRaw(string name, ImageReference reference, CancellationToken token = default);
 
-    Task<ImageReference?> GetDigest(string name, ImageReference reference, CancellationToken token = default);
+    Task<ImageDigest?> GetDigest(string name, ImageTag tag, CancellationToken token = default);
 
     /// <summary>
     ///     Fetch the manifest identified by name and reference where reference can be a tag or digest. A HEAD request can also

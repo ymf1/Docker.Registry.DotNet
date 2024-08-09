@@ -33,7 +33,16 @@ internal class ManifestOperations(NetworkClient client) : IManifestOperations
         ImageReference reference,
         CancellationToken token = default)
     {
-        var digestReference = await this.GetDigest(name, reference, token);
+        ImageDigest? digestReference = null;
+
+        if (reference.IsTag)
+        {
+            digestReference = await this.GetDigest(name, reference.Tag!, token);
+        }
+        else if (reference.IsDigest)
+        {
+            digestReference = reference.Digest;
+        }
 
         if (digestReference == null)
         {
@@ -42,7 +51,7 @@ internal class ManifestOperations(NetworkClient client) : IManifestOperations
                 @$"Failed getting the digest reference for ""{reference}""");
         }
 
-        var response = await this.MakeManifestRequest(name, digestReference, token);
+        var response = await this.MakeManifestRequest(name, digestReference.ToReference(), token);
 
         var contentType = this.GetContentType(response.GetHeader("ContentType"), response.Body);
 
@@ -123,23 +132,13 @@ internal class ManifestOperations(NetworkClient client) : IManifestOperations
         return response.Body;
     }
 
-    public async Task<ImageReference?> GetDigest(string name, ImageReference reference, CancellationToken token = default)
+    public async Task<ImageDigest?> GetDigest(string name, ImageTag tag, CancellationToken token = default)
     {
-        if (!reference.IsTag)
-        {
-            throw new ArgumentOutOfRangeException(nameof(reference), $@"Reference must be a tag to get the digest: ""{reference}""");
-        }
-
-        var response = await MakeManifestRequest(name, reference, token);
+        var response = await MakeManifestRequest(name, tag.ToReference(), token);
 
         var digestValue = response.GetHeader("Docker-Content-Digest");
 
-        if (ImageReference.TryCreate(digestValue, out var digest))
-        {
-            return digest;
-        }
-
-        return null;
+        return ImageDigest.TryCreate(digestValue, out var digest) ? digest : null;
     }
 
     private async Task<RegistryApiResponse<string>> MakeManifestRequest(

@@ -13,135 +13,66 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace Docker.Registry.DotNet.Domain.Tags;
 
 public record ImageReference
 {
-    public ImageReference(string value)
+    public ImageReference(ImageTag tag)
     {
-        var parsedTag = value?.Trim() ?? string.Empty;
-
-        if (IsSha256Digest(parsedTag.ToLower()))
-        {
-            // save as all lower
-            this.Value = parsedTag.ToLower();
-        }
-        else
-        {
-            var errors = ValidateTag(parsedTag).ToList();
-
-            if (errors.Any())
-            {
-                throw new ArgumentException(
-                    $"Invalid Image Reference: {errors.ToDelimitedString(", ")}",
-                    nameof(value));
-            }
-
-            this.Value = parsedTag;
-        }
+        this.Tag = tag ?? throw new ArgumentNullException(nameof(tag), "Invalid Tag");
     }
 
-    public static ImageReference Latest { get; } = new("latest");
-
-    public string Value { get; init; }
-
-    public bool IsDigest => IsSha256Digest(Value);
-
-    public bool IsTag => !this.IsDigest;
-
-    public void Deconstruct(out string value)
+    public ImageReference(ImageDigest digest)
     {
-        value = this.Value;
+        this.Digest = digest ?? throw new ArgumentNullException(nameof(digest), "Invalid Digest");
     }
 
-    public static ImageReference Create(string tag)
+    public ImageTag? Tag { get; init; }
+
+    public ImageDigest? Digest { get; init; }
+
+    public bool IsDigest => Digest != null;
+
+    public bool IsTag => Tag != null;
+
+    public static ImageReference Create(ImageTag tag)
     {
         return new ImageReference(tag);
     }
 
-    public static bool TryCreate(string reference, [NotNullWhen(true)] out ImageReference? imageTag)
+    public static ImageReference Create(ImageDigest digest)
     {
-        reference = reference?.Trim() ?? string.Empty;
-
-        var errors = ValidateTag(reference).ToList();
-
-        imageTag = null;
-
-        if (errors.Any())
-        {
-            return false;
-        }
-
-        imageTag = new ImageReference(reference);
-
-        return true;
+        return new ImageReference(digest);
     }
 
-    static bool IsSha256Digest(string value)
+    public static ImageReference Create(string reference)
     {
-        const string DigestPrefix = "sha256:";
+        return ImageDigest.TryCreate(reference, out var digest) ? Create(digest) : Create(ImageTag.Create(reference));
+    }
 
-        if (value?.StartsWith(DigestPrefix) ?? false)
+    public static bool TryCreate(string reference, out ImageReference? imageReference)
+    {
+        if (ImageDigest.TryCreate(reference, out var digest))
         {
-            // sha256 hash is always 64 characters
-            string hash = value.TakeAfter(DigestPrefix.Length) ?? string.Empty;
-
-            if (hash.Length == 64 && hash.All(c => c.IsHexLowerCase()))
-            {
-                return true;
-            }
+            imageReference = Create(digest);
+            return true;
         }
 
+        if (ImageTag.TryCreate(reference, out var tag))
+        {
+            imageReference = Create(tag);
+            return true;
+        }
+
+        imageReference = null;
         return false;
     }
 
-    private static IEnumerable<string> ValidateTag(string value)
+    public override string ToString()
     {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            yield return "Value must not be null or empty";
+        if (this.IsTag) return this.Tag?.ToString()!;
+        if (this.IsDigest) return this.Digest?.ToString()!;
 
-            yield break;
-        }
-
-        if (value.Length > 128)
-        {
-            yield return $"Value is too large. Value is {value.Length
-            } characters and maximum tag size is 128 characters.";
-
-            yield break;
-        }
-
-        if (IsSha256Digest(value.ToLower()))
-        {
-            yield break;
-        }
-
-        var validChars = new[] { '-', '_', '.' };
-
-        var invalidCharacters =
-#if NET7_0_OR_GREATER
-            value.Where(c => !char.IsAsciiLetterOrDigit(c) && !validChars.Contains(c)).ToArray();
-#else
-            value.Where(c => !char.IsLetterOrDigit(c) && !validChars.Contains(c)).ToArray();
-#endif
-
-        if (invalidCharacters.Any())
-        {
-            yield return @$"Value ""{value}"" is invalid characters: ""{
-                invalidCharacters.Select(s => $"{s}").ToDelimitedString(",")
-            }"". Image References can only contain lowercase and uppercase letters, digits, underscores, periods, and hyphens.";
-
-            yield break;
-        }
-
-        if (value.StartsWith(".") || value.StartsWith("-"))
-        {
-            yield return @$"Value ""{value}"" is invalid. Image References can't start with a period or hyphen.";
-        }
+        return base.ToString();
     }
-
-    public override string ToString() => this.Value;
 }

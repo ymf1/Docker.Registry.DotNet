@@ -22,5 +22,5 @@ internal static class CharHelpers
     /// </summary>
     /// <param name="c"></param>
     /// <returns></returns>
-    internal static bool IsHexLowerCase(this char c) => c is >= '0' and <= '9' or >= 'a' and <= 'f';
+    internal static bool IsHash(this char c) => c is >= '0' and <= '9' or >= 'a' and <= 'f' or '=' or '_' or '-';
 }

@@ -1,4 +1,4 @@
-﻿//  Copyright 2017-2022 Rich Quackenbush, Jaben Cargman
+﻿// Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
 //  and Docker.Registry.DotNet Contributors
 // 
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,14 @@ internal class ListTagsResponseDto
     public IReadOnlyCollection<string> Tags { get; set; } = [];
 }
 
-public record ListTagResponseModel(string Name, IReadOnlyCollection<ImageReference> Tags)
+public record ListTagResponseModel(string Name, IReadOnlyCollection<ImageTag> Tags)
 {
     public static ListTagResponseModel Empty { get; } = new("", []);
+}
+
+public record DigestTagModel(ImageDigest Digest, IReadOnlyCollection<ImageTag> Tags);
+
+public record ListTagByDigestResponseModel(string Name, IReadOnlyCollection<DigestTagModel> Tags)
+{
+    public static ListTagByDigestResponseModel Empty { get; } = new("", new List<DigestTagModel>());
 }
