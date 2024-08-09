@@ -17,7 +17,7 @@ namespace Docker.Registry.DotNet.Helpers;
 
 internal static class HttpUtility
 {
-    internal static Uri BuildUri(this Uri baseUri, string path, IQueryString? queryString)
+    internal static Uri BuildUri(this Uri baseUri, string path, IReadOnlyQueryString? queryString)
     {
         if (baseUri == null) throw new ArgumentNullException(nameof(baseUri));
 

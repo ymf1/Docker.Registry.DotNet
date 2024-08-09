@@ -13,19 +13,21 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+using System.Diagnostics;
+
 namespace Docker.Registry.DotNet.OAuth;
 
 internal class OAuthClient
 {
     private readonly HttpClient _client = new();
 
-    private async Task<OAuthToken> GetTokenInnerAsync(
+    private async Task<OAuthToken?> GetTokenInner(
         string realm,
         string service,
         string scope,
         string? username,
         string? password,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
         HttpRequestMessage request;
 
@@ -61,28 +63,31 @@ internal class OAuthClient
             };
         }
 
-        using var response = await this._client.SendAsync(request, cancellationToken);
+        using var response = await this._client.SendAsync(request, token);
 
         if (!response.IsSuccessStatusCode)
-            throw new UnauthorizedAccessException("Unable to authenticate.");
+        {
+            throw new UnauthorizedAccessException(
+                $"Unable to authenticate: {await response.Content.ReadAsStringAsyncWithCancellation(token)}");
+        }
 
-        var body = await response.Content.ReadAsStringAsync();
+        var body = await response.Content.ReadAsStringAsyncWithCancellation(token);
 
-        var token = JsonConvert.DeserializeObject<OAuthToken>(body);
+        var authToken = JsonConvert.DeserializeObject<OAuthToken>(body);
 
-        return token;
+        return authToken;
     }
 
-    public Task<OAuthToken> GetTokenAsync(
+    public Task<OAuthToken?> GetToken(
         string realm,
         string service,
         string scope,
         CancellationToken cancellationToken = default)
     {
-        return this.GetTokenInnerAsync(realm, service, scope, null, null, cancellationToken);
+        return this.GetTokenInner(realm, service, scope, null, null, cancellationToken);
     }
 
-    public Task<OAuthToken> GetTokenAsync(
+    public Task<OAuthToken?> GetToken(
         string realm,
         string service,
         string scope,
@@ -90,7 +95,7 @@ internal class OAuthClient
         string password,
         CancellationToken cancellationToken = default)
     {
-        return this.GetTokenInnerAsync(
+        return this.GetTokenInner(
             realm,
             service,
             scope,

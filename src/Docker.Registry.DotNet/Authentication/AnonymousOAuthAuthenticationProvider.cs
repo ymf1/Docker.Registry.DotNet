@@ -18,31 +18,31 @@ namespace Docker.Registry.DotNet.Authentication;
 [PublicAPI]
 public class AnonymousOAuthAuthenticationProvider : AuthenticationProvider
 {
-    private readonly OAuthClient _client = new OAuthClient();
+    private readonly OAuthClient _client = new();
 
     private static string Schema { get; } = "Bearer";
 
-    public override Task AuthenticateAsync(HttpRequestMessage request)
+    public override Task Authenticate(HttpRequestMessage request)
     {
-            return Task.CompletedTask;
-        }
+        return Task.CompletedTask;
+    }
 
-    public override async Task AuthenticateAsync(
+    public override async Task Authenticate(
         HttpRequestMessage request,
         HttpResponseMessage response)
     {
-            var header = this.TryGetSchemaHeader(response, Schema);
+        var header = this.TryGetSchemaHeader(response, Schema);
 
-            //Get the bearer bits
-            var bearerBits = AuthenticateParser.ParseTyped(header.Parameter);
+        //Get the bearer bits
+        var bearerBits = AuthenticateParser.ParseTyped(header.Parameter);
 
-            //Get the token
-            var token = await this._client.GetTokenAsync(
-                bearerBits.Realm,
-                bearerBits.Service,
-                bearerBits.Scope);
+        //Get the token
+        var token = await this._client.GetToken(
+            bearerBits.Realm,
+            bearerBits.Service,
+            bearerBits.Scope);
 
-            //Set the header
-            request.Headers.Authorization = new AuthenticationHeaderValue(Schema, token.Token);
-        }
+        //Set the header
+        request.Headers.Authorization = new AuthenticationHeaderValue(Schema, token.Token);
+    }
 }

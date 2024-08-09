@@ -25,7 +25,7 @@ public abstract class AuthenticationProvider
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    public abstract Task AuthenticateAsync(HttpRequestMessage request);
+    public abstract Task Authenticate(HttpRequestMessage request);
 
     /// <summary>
     ///     Called when the send is challenged.
@@ -33,7 +33,7 @@ public abstract class AuthenticationProvider
     /// <param name="request"></param>
     /// <param name="response"></param>
     /// <returns></returns>
-    public abstract Task AuthenticateAsync(
+    public abstract Task Authenticate(
         HttpRequestMessage request,
         HttpResponseMessage response);
 

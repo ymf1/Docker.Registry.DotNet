@@ -66,9 +66,9 @@ namespace DockerRegistryExplorer.ViewModel
 
         private async Task ListImagesTags()
         {
-            var tags = await this._registryClient.Tags.ListImageTagsAsync(
+            var tags = await this._registryClient.Tags.ListTags(
                 this.Name,
-                new ListImageTagsParameters());
+                new ListTagsParameters());
 
             if (tags.Tags == null) this.Tags = new TagViewModel[] { };
             else

@@ -17,31 +17,29 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
 internal class TagOperations(NetworkClient client) : ITagOperations
 {
-    private readonly NetworkClient _client = client ?? throw new ArgumentNullException(nameof(client));
-
-    public async Task<ListImageTagsResponse> ListImageTagsAsync(
+    public async Task<ListTagsResponse> ListTags(
         string name,
-        ListImageTagsParameters? parameters = null,
-        CancellationToken cancellationToken = default)
+        ListTagsParameters? parameters = null,
+        CancellationToken token = default)
     {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentException(
-                    $"'{nameof(name)}' cannot be null or empty",
-                    nameof(name));
+        if (string.IsNullOrEmpty(name))
+            throw new ArgumentException(
+                $"'{nameof(name)}' cannot be null or empty",
+                nameof(name));
 
-            parameters = parameters ?? new ListImageTagsParameters();
+        parameters ??= new ListTagsParameters();
 
-            var queryString = new QueryString();
+        var queryString = new QueryString();
 
-            queryString.AddFromObjectWithQueryParameters(parameters);
+        queryString.AddFromObject(parameters);
 
-            var response = await this._client.MakeRequestAsync(
-                cancellationToken,
-                HttpMethod.Get,
-                $"v2/{name}/tags/list",
-                queryString).ConfigureAwait(false);
+        var response = await client.MakeRequest(
+            HttpMethod.Get,
+            $"{client.RegistryVersion}/{name}/tags/list",
+            queryString,
+            token: token);
 
-            return this._client.JsonSerializer.DeserializeObject<ListImageTagsResponse>(
-                response.Body);
-        }
+        return client.JsonSerializer.DeserializeObject<ListTagsResponse>(
+            response.Body);
+    }
 }

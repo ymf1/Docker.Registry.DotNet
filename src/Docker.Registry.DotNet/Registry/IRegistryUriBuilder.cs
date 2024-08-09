@@ -1,4 +1,4 @@
-﻿//  Copyright 2017-2022 Rich Quackenbush, Jaben Cargman
+﻿// Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
 //  and Docker.Registry.DotNet Contributors
 // 
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +13,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-namespace Docker.Registry.DotNet.Helpers;
+namespace Docker.Registry.DotNet.Registry;
 
-internal interface IQueryString
+public interface IRegistryUriBuilder
 {
-    string GetQueryString();
+    Uri Build(string? path = null, string? queryString = null);
+}
+
+internal static class RegistryUriBuilderExtensions
+{
+    public static Uri Build(
+        this IRegistryUriBuilder uriBuilder,
+        string? path = null,
+        IReadOnlyQueryString? queryString = null)
+    {
+        return uriBuilder.Build(path, queryString?.GetQueryString());
+    }
 }

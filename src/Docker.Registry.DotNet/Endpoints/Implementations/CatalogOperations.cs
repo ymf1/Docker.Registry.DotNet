@@ -17,24 +17,22 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
 internal class CatalogOperations(NetworkClient client) : ICatalogOperations
 {
-    private readonly NetworkClient _client = client ?? throw new ArgumentNullException(nameof(client));
-
-    public async Task<Catalog> GetCatalogAsync(
+    public async Task<CatalogResponse> GetCatalog(
         CatalogParameters? parameters = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
-            parameters = parameters ?? new CatalogParameters();
+        parameters ??= new CatalogParameters();
 
-            var queryParameters = new QueryString();
+        var queryParameters = new QueryString();
 
-            queryParameters.AddFromObjectWithQueryParameters(parameters);
+        queryParameters.AddFromObject(parameters);
 
-            var response = await this._client.MakeRequestAsync(
-                cancellationToken,
-                HttpMethod.Get,
-                "v2/_catalog",
-                queryParameters).ConfigureAwait(false);
+        var response = await client.MakeRequest(
+            HttpMethod.Get,
+            $"{client.RegistryVersion}/_catalog",
+            queryParameters,
+            token: token);
 
-            return this._client.JsonSerializer.DeserializeObject<Catalog>(response.Body);
-        }
+        return client.JsonSerializer.DeserializeObject<CatalogResponse>(response.Body);
+    }
 }

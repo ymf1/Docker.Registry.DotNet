@@ -20,12 +20,12 @@ public class BasicAuthenticationProvider(string username, string password) : Aut
 {
     private static string Schema { get; } = "Basic";
 
-    public override Task AuthenticateAsync(HttpRequestMessage request)
+    public override Task Authenticate(HttpRequestMessage request)
     {
         return Task.CompletedTask;
     }
 
-    public override Task AuthenticateAsync(
+    public override Task Authenticate(
         HttpRequestMessage request,
         HttpResponseMessage response)
     {

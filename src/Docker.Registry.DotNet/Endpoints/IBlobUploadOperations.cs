@@ -24,43 +24,28 @@ public interface IBlobUploadOperations
     /// <param name="contentLength"></param>
     /// <param name="stream"></param>
     /// <param name="digest"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
     [PublicAPI]
-    Task UploadBlobAsync(
+    Task UploadBlob(
         string name,
         int contentLength,
         Stream stream,
         string digest,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    ///     Initiate a resumable blob upload. If successful, an upload location will be provided to complete the upload.
-    ///     Optionally, if the digest parameter is present, the request body will be used to complete the upload in a single
-    ///     request.
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="stream"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [PublicAPI]
-    Task<ResumableUpload> InitiateBlobUploadAsync(
-        string name,
-        Stream? stream = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken token = default);
 
     /// <summary>
     ///     Mount a blob identified by the mount parameter from another repository.
     /// </summary>
     /// <param name="name"></param>
     /// <param name="parameters"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
     [PublicAPI]
-    Task<MountResponse> MountBlobAsync(
+    Task<MountResponse> MountBlob(
         string name,
         MountParameters parameters,
-        CancellationToken cancellationToken = default);
+        CancellationToken token = default);
 
     /// <summary>
     ///     Retrieve status of upload identified by uuid. The primary purpose of this endpoint is to resolve the current status
@@ -83,15 +68,15 @@ public interface IBlobUploadOperations
     /// <param name="chunk"></param>
     /// <param name="from"></param>
     /// <param name="to"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
     [PublicAPI]
-    Task<ResumableUpload> UploadBlobChunkAsync(
+    Task<ResumableUpload> UploadBlobChunk(
         ResumableUpload resumable,
         Stream chunk,
         long? from = null,
         long? to = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken token = default);
 
     /// <summary>
     ///     Complete the upload specified by ResumableUploadResponse, optionally appending the body as the final chunk.
@@ -101,16 +86,16 @@ public interface IBlobUploadOperations
     /// <param name="chunk"></param>
     /// <param name="from"></param>
     /// <param name="to"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
     [PublicAPI]
-    Task<CompletedUploadResponse> CompleteBlobUploadAsync(
+    Task<CompletedUploadResponse> CompleteBlobUpload(
         ResumableUpload resumable,
         string digest,
         Stream? chunk = null,
         long? from = null,
         long? to = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken token = default);
 
     /// <summary>
     ///     Cancel outstanding upload processes, releasing associated resources. If this is not called, the unfinished uploads
@@ -118,23 +103,23 @@ public interface IBlobUploadOperations
     /// </summary>
     /// <param name="name"></param>
     /// <param name="uuid"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
     [PublicAPI]
-    Task CancelBlobUploadAsync(
+    Task CancelBlobUpload(
         string name,
         string uuid,
-        CancellationToken cancellationToken = default);
+        CancellationToken token = default);
 
     /// <summary>
     /// Starting An Upload
     /// </summary>
     /// <param name="name"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
-    Task<ResumableUpload> StartUploadBlobAsync(
+    Task<ResumableUpload> StartUploadBlob(
         string name,
-        CancellationToken cancellationToken = default);
+        CancellationToken token = default);
 
     /// <summary>
     /// A monolithic upload is simply a chunked upload with a single chunk and may be favored by clients that would like to avoided the complexity of chunking
@@ -142,11 +127,11 @@ public interface IBlobUploadOperations
     /// <param name="resumable"></param>
     /// <param name="digest"></param>
     /// <param name="stream"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
-    Task<CompletedUploadResponse> MonolithicUploadBlobAsync(
+    Task<CompletedUploadResponse> MonolithicUploadBlob(
         ResumableUpload resumable,
         string digest,
         Stream stream,
-        CancellationToken cancellationToken = default);
+        CancellationToken token = default);
 }

@@ -19,8 +19,8 @@ namespace Docker.Registry.DotNet.Endpoints;
 public interface ITagOperations
 {
     [PublicAPI]
-    Task<ListImageTagsResponse> ListImageTagsAsync(
+    Task<ListTagsResponse> ListTags(
         string name,
-        ListImageTagsParameters? parameters = null,
-        CancellationToken cancellationToken = default);
+        ListTagsParameters? parameters = null,
+        CancellationToken token = default);
 }

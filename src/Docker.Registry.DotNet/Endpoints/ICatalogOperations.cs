@@ -22,10 +22,10 @@ public interface ICatalogOperations
     ///     Retrieve a sorted, json list of repositories available in the registry.
     /// </summary>
     /// <param name="parameters"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
     [PublicAPI]
-    Task<Catalog> GetCatalogAsync(
+    Task<CatalogResponse> GetCatalog(
         CatalogParameters? parameters = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken token = default);
 }

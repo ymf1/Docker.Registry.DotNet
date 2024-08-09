@@ -40,7 +40,7 @@ internal class NetworkClient : IDisposable
             }
         };
 
-    private Uri? _effectiveEndpointBaseUri;
+    internal IRegistryUriBuilder? UriBuilder;
 
     public NetworkClient(
         RegistryClientConfiguration configuration,
@@ -60,10 +60,9 @@ internal class NetworkClient : IDisposable
         this.DefaultTimeout = configuration.DefaultTimeout;
 
         this.JsonSerializer = new JsonSerializer();
-
-        if (this._configuration.EndpointBaseUri != null)
-            this._effectiveEndpointBaseUri = this._configuration.EndpointBaseUri;
     }
+
+    public string RegistryVersion { get; } = "v2";
 
     public TimeSpan DefaultTimeout { get; set; }
 
@@ -71,7 +70,7 @@ internal class NetworkClient : IDisposable
 
     public void Dispose()
     {
-        this._client?.Dispose();
+        this._client.Dispose();
     }
 
     /// <summary>
@@ -80,7 +79,7 @@ internal class NetworkClient : IDisposable
     /// <returns></returns>
     private async Task EnsureConnection()
     {
-        if (this._effectiveEndpointBaseUri != null) return;
+        if (this.UriBuilder != null) return;
 
         var tryUrls = new List<string>();
 
@@ -103,8 +102,9 @@ internal class NetworkClient : IDisposable
         foreach (var url in tryUrls)
             try
             {
-                await this.ProbeSingleAsync($"{url}/v2/");
-                this._effectiveEndpointBaseUri = new Uri(url);
+                var registryUriBuilder = new RegistryUriBuilder(url);
+                await this.ProbeSingleEndpoint(registryUriBuilder);
+                this.UriBuilder = registryUriBuilder;
                 return;
             }
             catch (Exception ex)
@@ -113,32 +113,26 @@ internal class NetworkClient : IDisposable
             }
 
         throw new RegistryConnectionException(
-            $"Unable to connect to any: {tryUrls.Select(s => $"'{s}/v2/'").ToDelimitedString(", ")}'",
+            $"Unable to connect to any: {tryUrls.Select(s => $"'{s}/{this.RegistryVersion}/'").ToDelimitedString(", ")}'",
             new AggregateException(exceptions));
     }
 
-    private async Task ProbeSingleAsync(string uri)
+    private async Task ProbeSingleEndpoint(IRegistryUriBuilder uriBuilder)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+        using var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Build());
         using (await this._client.SendAsync(request))
         {
         }
     }
 
-    internal async Task<RegistryApiResponse<string>> MakeRequestAsync(
-        CancellationToken cancellationToken,
+    internal async Task<RegistryApiResponse<string>> MakeRequest(
         HttpMethod method,
         string path,
-        IQueryString? queryString = null,
+        IReadOnlyQueryString? queryString = null,
         IDictionary<string, string>? headers = null,
-        Func<HttpContent>? content = null)
+        Func<HttpContent>? content = null,
+        CancellationToken token = default)
     {
-        //Console.WriteLine(
-        //    "Requesting Path: {0} Method: {1} QueryString: {2}",
-        //    path,
-        //    method,
-        //    queryString?.GetQueryString());
-
         using var response = await this.InternalMakeRequestAsync(
             this.DefaultTimeout,
             HttpCompletionOption.ResponseContentRead,
@@ -147,9 +141,9 @@ internal class NetworkClient : IDisposable
             queryString,
             headers,
             content,
-            cancellationToken);
+            token);
 
-        var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var responseBody = await response.Content.ReadAsStringAsyncWithCancellation(token);
 
         var apiResponse = new RegistryApiResponse<string>(
             response.StatusCode,
@@ -162,19 +156,13 @@ internal class NetworkClient : IDisposable
     }
 
     internal async Task<RegistryApiResponse<string>> MakeRequestNotErrorAsync(
-        CancellationToken cancellationToken,
         HttpMethod method,
         string path,
-        IQueryString? queryString = null,
+        IReadOnlyQueryString? queryString = null,
         IDictionary<string, string>? headers = null,
-        Func<HttpContent>? content = null)
+        Func<HttpContent>? content = null,
+        CancellationToken token = default)
     {
-        //Console.WriteLine(
-        //    "Requesting Path: {0} Method: {1} QueryString: {2}",
-        //    path,
-        //    method,
-        //    queryString?.GetQueryString());
-
         using var response = await this.InternalMakeRequestAsync(
             this.DefaultTimeout,
             HttpCompletionOption.ResponseContentRead,
@@ -183,9 +171,10 @@ internal class NetworkClient : IDisposable
             queryString,
             headers,
             content,
-            cancellationToken);
+            token);
 
-        var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var responseBody = await response.Content.ReadAsStringAsyncWithCancellation(token)
+            .ConfigureAwait(false);
 
         var apiResponse = new RegistryApiResponse<string>(
             response.StatusCode,
@@ -196,10 +185,10 @@ internal class NetworkClient : IDisposable
     }
 
     internal async Task<RegistryApiResponse<Stream>> MakeRequestForStreamedResponseAsync(
-        CancellationToken cancellationToken,
         HttpMethod method,
         string path,
-        IQueryString? queryString = null)
+        IReadOnlyQueryString? queryString = null,
+        CancellationToken token = default)
     {
         var response = await this.InternalMakeRequestAsync(
             InfiniteTimeout,
@@ -209,9 +198,9 @@ internal class NetworkClient : IDisposable
             queryString,
             null,
             null,
-            cancellationToken);
+            token);
 
-        var body = await response.Content.ReadAsStreamAsync();
+        var body = await response.Content.ReadAsStreamAsyncWithCancellation(token);
 
         var apiResponse = new RegistryApiResponse<Stream>(
             response.StatusCode,
@@ -228,23 +217,29 @@ internal class NetworkClient : IDisposable
         HttpCompletionOption completionOption,
         HttpMethod method,
         string path,
-        IQueryString? queryString,
+        IReadOnlyQueryString? queryString,
         IDictionary<string, string>? headers,
         Func<HttpContent>? content,
         CancellationToken cancellationToken)
     {
         await this.EnsureConnection();
 
-        var request = this.PrepareRequest(method, path, queryString, headers, content);
+        if (this.UriBuilder == null)
+            throw new ArgumentNullException(nameof(this.UriBuilder), "Could not find URI builder");
+
+        var builtUri = this.UriBuilder.Build(path, queryString);
+
+        var request = this.PrepareRequest(method, builtUri, headers, content);
 
         if (timeout != InfiniteTimeout)
         {
-            var timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var timeoutTokenSource =
+                CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeoutTokenSource.CancelAfter(timeout);
             cancellationToken = timeoutTokenSource.Token;
         }
 
-        await this._authenticationProvider.AuthenticateAsync(request);
+        await this._authenticationProvider.Authenticate(request);
 
         var response = await this._client.SendAsync(
             request,
@@ -254,10 +249,10 @@ internal class NetworkClient : IDisposable
         if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
 
         //Prepare another request (we can't reuse the same request)
-        var request2 = this.PrepareRequest(method, path, queryString, headers, content);
+        var request2 = this.PrepareRequest(method, builtUri, headers, content);
 
         //Authenticate given the challenge
-        await this._authenticationProvider.AuthenticateAsync(request2, response);
+        await this._authenticationProvider.Authenticate(request2, response);
 
         //Send it again
         response = await this._client.SendAsync(
@@ -290,16 +285,13 @@ internal class NetworkClient : IDisposable
 
     internal HttpRequestMessage PrepareRequest(
         HttpMethod method,
-        string path,
-        IQueryString? queryString,
+        Uri uri,
         IDictionary<string, string>? headers,
         Func<HttpContent>? content)
     {
-        if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
-
         var request = new HttpRequestMessage(
             method,
-            this._effectiveEndpointBaseUri.BuildUri(path, queryString));
+            uri);
 
         request.Headers.Add("User-Agent", UserAgent);
         request.Headers.AddRange(headers);

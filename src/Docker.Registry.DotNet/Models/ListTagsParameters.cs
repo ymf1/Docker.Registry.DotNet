@@ -13,25 +13,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-namespace Docker.Registry.DotNet.Registry;
+namespace Docker.Registry.DotNet.Models;
 
-internal abstract class RegistryApiResponse(HttpStatusCode statusCode, HttpResponseHeaders headers)
+public class ListTagsParameters
 {
-    public HttpStatusCode StatusCode { get; } = statusCode;
-
-    public HttpResponseHeaders Headers { get; } = headers;
-}
-
-internal class RegistryApiResponse<TBody> : RegistryApiResponse
-{
-    internal RegistryApiResponse(
-        HttpStatusCode statusCode,
-        TBody? body,
-        HttpResponseHeaders headers)
-        : base(statusCode, headers)
-    {
-        this.Body = body;
-    }
-
-    public TBody? Body { get; }
+    /// <summary>
+    ///     Limit the number of entries in each response. It not present, all entries will be returned
+    /// </summary>
+    [QueryParameter("n")]
+    public int? Number { get; set; }
 }

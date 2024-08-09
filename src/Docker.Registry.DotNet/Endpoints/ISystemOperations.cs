@@ -19,5 +19,5 @@ namespace Docker.Registry.DotNet.Endpoints;
 public interface ISystemOperations
 {
     [PublicAPI]
-    Task PingAsync(CancellationToken cancellationToken = default);
+    Task Ping(CancellationToken token = default);
 }

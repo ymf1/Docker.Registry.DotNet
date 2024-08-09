@@ -17,48 +17,47 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
 internal class BlobOperations(NetworkClient client) : IBlobOperations
 {
-    public async Task<GetBlobResponse> GetBlobAsync(
+    public async Task<GetBlobResponse> GetBlob(
         string name,
         string digest,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
-            var url = $"v2/{name}/blobs/{digest}";
+        var response = await client.MakeRequestForStreamedResponseAsync(
+            HttpMethod.Get,
+            $"{client.RegistryVersion}/{name}/blobs/{digest}",
+            token: token);
 
-            var response = await client.MakeRequestForStreamedResponseAsync(
-                cancellationToken,
-                HttpMethod.Get,
-                url);
+        return new GetBlobResponse(
+            response.Headers.GetString("Docker-Content-Digest"),
+            response.Body);
+    }
 
-            return new GetBlobResponse(
-                response.Headers.GetString("Docker-Content-Digest"),
-                response.Body);
-        }
-
-    public Task DeleteBlobAsync(
+    public Task DeleteBlob(
         string name,
         string digest,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
-            var url = $"v2/{name}/blobs/{digest}";
+        return client.MakeRequest(
+            HttpMethod.Delete,
+            $"{client.RegistryVersion}/{name}/blobs/{digest}",
+            token: token);
+    }
 
-            return client.MakeRequestAsync(cancellationToken, HttpMethod.Delete, url);
-        }
-
-    public async Task<bool> IsExistBlobAsync(
+    public async Task<bool> BlobExists(
         string name,
         string digest,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
-            var path = $"v2/{name}/blobs/{digest}";
+        var path = $"{client.RegistryVersion}/{name}/blobs/{digest}";
 
-            var response = await client.MakeRequestNotErrorAsync(
-                cancellationToken,
-                HttpMethod.Head,
-                path);
+        var response = await client.MakeRequestNotErrorAsync(
+            HttpMethod.Head,
+            path,
+            token: token);
 
-            if (response.StatusCode != HttpStatusCode.NotFound)
-                client.HandleIfErrorResponse(response);
+        if (response.StatusCode != HttpStatusCode.NotFound)
+            client.HandleIfErrorResponse(response);
 
-            return response.StatusCode == HttpStatusCode.OK;
-        }
+        return response.StatusCode == HttpStatusCode.OK;
+    }
 }

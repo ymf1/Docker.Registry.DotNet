@@ -23,36 +23,36 @@ public interface IBlobOperations
     /// </summary>
     /// <param name="name"></param>
     /// <param name="digest"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
     [PublicAPI]
-    Task<GetBlobResponse> GetBlobAsync(
+    Task<GetBlobResponse> GetBlob(
         string name,
         string digest,
-        CancellationToken cancellationToken = default);
+        CancellationToken token = default);
 
     /// <summary>
     ///     Delete the blob identified by name and digest.
     /// </summary>
     /// <param name="name"></param>
     /// <param name="digest"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
     [PublicAPI]
-    Task DeleteBlobAsync(
+    Task DeleteBlob(
         string name,
         string digest,
-        CancellationToken cancellationToken = default);
+        CancellationToken token = default);
 
     /// <summary>
     /// Existing Layers
     /// </summary>
     /// <param name="name"></param>
     /// <param name="digest"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
-    Task<bool> IsExistBlobAsync(
+    Task<bool> BlobExists(
         string name,
         string digest,
-        CancellationToken cancellationToken = default);
+        CancellationToken token = default);
 }

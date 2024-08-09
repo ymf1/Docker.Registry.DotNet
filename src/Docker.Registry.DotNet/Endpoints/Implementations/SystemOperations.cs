@@ -17,8 +17,8 @@ namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
 internal class SystemOperations(NetworkClient client) : ISystemOperations
 {
-    public Task PingAsync(CancellationToken cancellationToken = default)
+    public virtual Task Ping(CancellationToken token = default)
     {
-            return client.MakeRequestAsync(cancellationToken, HttpMethod.Get, "v2/");
-        }
+        return client.MakeRequest(HttpMethod.Get, "", token: token);
+    }
 }

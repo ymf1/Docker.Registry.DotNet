@@ -13,25 +13,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-namespace Docker.Registry.DotNet.Registry;
+namespace Docker.Registry.DotNet.Models;
 
-internal abstract class RegistryApiResponse(HttpStatusCode statusCode, HttpResponseHeaders headers)
+[DataContract]
+public class ListTagsResponse
 {
-    public HttpStatusCode StatusCode { get; } = statusCode;
+    [DataMember(Name = "name")]
+    public string? Name { get; set; }
 
-    public HttpResponseHeaders Headers { get; } = headers;
-}
-
-internal class RegistryApiResponse<TBody> : RegistryApiResponse
-{
-    internal RegistryApiResponse(
-        HttpStatusCode statusCode,
-        TBody? body,
-        HttpResponseHeaders headers)
-        : base(statusCode, headers)
-    {
-        this.Body = body;
-    }
-
-    public TBody? Body { get; }
+    [DataMember(Name = "tags")]
+    public IReadOnlyCollection<string> Tags { get; set; } = [];
 }

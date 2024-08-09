@@ -13,170 +13,159 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+using System.Diagnostics;
+
 namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
-internal class BlobUploadOperations : IBlobUploadOperations
+internal class BlobUploadOperations(NetworkClient client) : IBlobUploadOperations
 {
-    private readonly NetworkClient _client;
-
-    internal BlobUploadOperations(NetworkClient client)
-    {
-            this._client = client;
-        }
-
-    public async Task<ResumableUpload> StartUploadBlobAsync(
+    public async Task<ResumableUpload> StartUploadBlob(
         string name,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
-            var path = $"v2/{name}/blobs/uploads/";
-            var response = await this._client.MakeRequestAsync(
-                cancellationToken,
-                HttpMethod.Post,
-                path);
-            return new ResumableUpload
-            {
-                DockerUploadUuid = response.Headers.GetString("Docker-Upload-UUID"),
-                Location = response.Headers.GetString("location"),
-                Range = response.Headers.GetString("Range")
-            };
-        }
+        var path = $"{client.RegistryVersion}/{name}/blobs/uploads/";
+        var response = await client.MakeRequest(
+            HttpMethod.Post,
+            path,
+            token: token);
 
-    public Task<CompletedUploadResponse> MonolithicUploadBlobAsync(
+        return new ResumableUpload
+        {
+            DockerUploadUuid = response.Headers.GetString("Docker-Upload-UUID"),
+            Location = response.Headers.GetString("location"),
+            Range = response.Headers.GetString("Range")
+        };
+    }
+
+    public Task<CompletedUploadResponse> MonolithicUploadBlob(
         ResumableUpload resumable,
         string digest,
         Stream stream,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
-            return CompleteBlobUploadAsync(
-                resumable,
-                digest,
-                stream,
-                cancellationToken: cancellationToken);
-        }
+        return this.CompleteBlobUpload(
+            resumable,
+            digest,
+            stream,
+            token: token);
+    }
 
-    public Task<ResumableUpload> InitiateBlobUploadAsync(
-        string name,
-        Stream? stream = null,
-        CancellationToken cancellationToken = default)
-    {
-            throw new NotImplementedException();
-        }
-
-    public async Task<MountResponse> MountBlobAsync(
+    public async Task<MountResponse> MountBlob(
         string name,
         MountParameters parameters,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
-            var queryString = new QueryString();
-            queryString.Add("mount", parameters.Digest);
-            queryString.Add("from", parameters.From);
+        var queryString = new QueryString();
+        queryString.Add("mount", parameters.Digest);
+        queryString.Add("from", parameters.From);
 
-            var response = await this._client.MakeRequestAsync(
-                cancellationToken,
-                HttpMethod.Post,
-                $"v2/{name}/blobs/uploads/",
-                queryString);
-            return new MountResponse
-            {
-                DockerUploadUuid = response.Headers.GetString("Docker-Upload-UUID"),
-                Location = response.Headers.GetString("location"),
-                Created = response.StatusCode == HttpStatusCode.Created,
-            };
-        }
+        var response = await client.MakeRequest(
+            HttpMethod.Post,
+            $"{client.RegistryVersion}/{name}/blobs/uploads/",
+            queryString,
+            token: token);
+
+        return new MountResponse
+        {
+            DockerUploadUuid = response.Headers.GetString("Docker-Upload-UUID"),
+            Location = response.Headers.GetString("location"),
+            Created = response.StatusCode == HttpStatusCode.Created
+        };
+    }
 
     public async Task<BlobUploadStatus> GetBlobUploadStatus(
         string name,
         string uuid,
         CancellationToken cancellationToken = default)
     {
-            var response = await this._client.MakeRequestAsync(
-                cancellationToken,
-                HttpMethod.Get,
-                $"v2/{name}/blobs/uploads/{uuid}");
+        var response = await client.MakeRequest(
+            HttpMethod.Get,
+            $"{name}/blobs/uploads/{uuid}",
+            token: cancellationToken);
 
-            return new BlobUploadStatus
-            {
-                DockerUploadUuid = response.Headers.GetString("Docker-Upload-UUID"),
-                Range = response.Headers.GetString("Range")
-            };
-        }
+        return new BlobUploadStatus
+        {
+            DockerUploadUuid = response.Headers.GetString("Docker-Upload-UUID"),
+            Range = response.Headers.GetString("Range")
+        };
+    }
 
-    public async Task<ResumableUpload> UploadBlobChunkAsync(
+    public async Task<ResumableUpload> UploadBlobChunk(
         ResumableUpload resumable,
         Stream chunk,
         long? from = null,
         long? to = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
-            var response = await this._client.MakeRequestAsync(
-                cancellationToken,
-                new HttpMethod("PATCH"),
-                resumable.Location,
-                content: () =>
-                {
-                    chunk.Position = 0;
-                    var content = new StreamContent(chunk);
-                    content.Headers.ContentLength = chunk.Length;
-                    content.Headers.ContentType =
-                        new MediaTypeHeaderValue("application/octet-stream");
-                    content.Headers.ContentRange =
-                        new ContentRangeHeaderValue(from ?? 0, to ?? chunk.Length);
-                    return content;
-                }).ConfigureAwait(false);
-
-            return new ResumableUpload
+        var response = await client.MakeRequest(
+            new HttpMethod("PATCH"),
+            resumable.Location,
+            content: () =>
             {
-                DockerUploadUuid = response.Headers.GetString("Docker-Upload-UUID"),
-                Location = response.Headers.GetString("location"),
-                Range = response.Headers.GetString("Range")
-            };
-        }
+                chunk.Position = 0;
+                var content = new StreamContent(chunk);
+                content.Headers.ContentLength = chunk.Length;
+                content.Headers.ContentType =
+                    new MediaTypeHeaderValue("application/octet-stream");
+                content.Headers.ContentRange =
+                    new ContentRangeHeaderValue(from ?? 0, to ?? chunk.Length);
+                return content;
+            },
+            token: token);
 
-    public async Task<CompletedUploadResponse> CompleteBlobUploadAsync(
+        return new ResumableUpload
+        {
+            DockerUploadUuid = response.Headers.GetString("Docker-Upload-UUID"),
+            Location = response.Headers.GetString("location"),
+            Range = response.Headers.GetString("Range")
+        };
+    }
+
+    public async Task<CompletedUploadResponse> CompleteBlobUpload(
         ResumableUpload resumable,
         string digest,
         Stream? chunk = null,
         long? from = null,
         long? to = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
-            var queryString = new QueryString();
-            queryString.Add("digest", digest);
+        var queryString = new QueryString();
+        queryString.Add("digest", digest);
 
-            var response = await this._client.MakeRequestAsync(
-                cancellationToken,
-                HttpMethod.Put,
-                resumable.Location,
-                queryString,
-                content: () =>
-                {
-                    if (chunk is null) chunk = new MemoryStream();
-                    chunk.Position = 0;
-                    var content = new StreamContent(chunk);
-                    content.Headers.ContentLength = chunk.Length;
-                    content.Headers.ContentType =
-                        new MediaTypeHeaderValue("application/octet-stream");
-                    content.Headers.ContentRange =
-                        new ContentRangeHeaderValue(from ?? 0, to ?? chunk.Length);
-                    return content;
-                }).ConfigureAwait(false);
-
-            return new CompletedUploadResponse
+        var response = await client.MakeRequest(
+            HttpMethod.Put,
+            resumable.Location,
+            queryString,
+            content: () =>
             {
-                DockerContentDigest = response.Headers.GetString("Docker-Content-Digest"),
-                Location = response.Headers.GetString("location"),
-            };
-        }
+                if (chunk is null) chunk = new MemoryStream();
+                chunk.Position = 0;
+                var content = new StreamContent(chunk);
+                content.Headers.ContentLength = chunk.Length;
+                content.Headers.ContentType =
+                    new MediaTypeHeaderValue("application/octet-stream");
+                content.Headers.ContentRange =
+                    new ContentRangeHeaderValue(from ?? 0, to ?? chunk.Length);
+                return content;
+            },
+            token: token);
 
-    public Task CancelBlobUploadAsync(
+        return new CompletedUploadResponse
+        {
+            DockerContentDigest = response.Headers.GetString("Docker-Content-Digest"),
+            Location = response.Headers.GetString("location")
+        };
+    }
+
+    public Task CancelBlobUpload(
         string name,
         string uuid,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
-            var path = $"v2/{name}/blobs/uploads/{uuid}";
+        var path = $"{client.RegistryVersion}/{name}/blobs/uploads/{uuid}";
 
-            return this._client.MakeRequestAsync(cancellationToken, HttpMethod.Delete, path);
-        }
+        return client.MakeRequest(HttpMethod.Delete, path, token: token);
+    }
 
     /// <summary>
     ///     Perform a monolithic upload.
@@ -185,121 +174,75 @@ internal class BlobUploadOperations : IBlobUploadOperations
     /// <param name="contentLength"></param>
     /// <param name="stream"></param>
     /// <param name="digest"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
-    public async Task UploadBlobAsync(
+    public async Task UploadBlob(
         string name,
         int contentLength,
         Stream stream,
         string digest,
-        CancellationToken cancellationToken = default)
+        CancellationToken token = default)
     {
-            var path = $"v2/{name}/blobs/uploads/";
+        var path = $"{client.RegistryVersion}/{name}/blobs/uploads/";
 
-            var response = await this._client.MakeRequestAsync(
-                cancellationToken,
-                HttpMethod.Post,
-                path);
+        var response = await client.MakeRequest(
+            HttpMethod.Post,
+            path,
+            token: token);
 
-            var uuid = response.Headers.GetString("Docker-Upload-UUID");
+        var uuid = response.Headers.GetString("Docker-Upload-UUID");
 
-            Console.WriteLine($"Uploading with uuid: {uuid}");
+        Debug.WriteLine($"Uploading with uuid: {uuid}");
 
-            var location = response.Headers.GetString("Location");
+        var location = response.Headers.GetString("Location");
 
-            Console.WriteLine($"Using location: {location}");
+        Debug.WriteLine($"Using location: {location}");
 
-            //await GetBlobUploadStatus(name, uuid, cancellationToken);
+        //await GetBlobUploadStatus(name, uuid, cancellationToken);
 
-            try
+        try
+        {
+            using var blobClient = new HttpClient();
+
+            var progressResponse = await blobClient.GetAsync(location, token);
+
+            //Send the contents of the whole file
+            var content = new StreamContent(stream);
+
+            content.Headers.ContentLength = stream.Length;
+            content.Headers.ContentType =
+                new MediaTypeHeaderValue("application/octet-stream");
+            content.Headers.ContentRange = new ContentRangeHeaderValue(0, stream.Length);
+
+            var request = new HttpRequestMessage(
+                new HttpMethod("PATCH"),
+                $"{location}&digest={digest}")
             {
-                using (var client = new HttpClient())
-                {
-                    var progressResponse = await client.GetAsync(location, cancellationToken);
+                Content = content
+            };
 
-                    //Send the contents of the whole file
-                    var content = new StreamContent(stream);
+            var response2 = await blobClient.SendAsync(request, token);
 
-                    content.Headers.ContentLength = stream.Length;
-                    content.Headers.ContentType =
-                        new MediaTypeHeaderValue("application/octet-stream");
-                    content.Headers.ContentRange = new ContentRangeHeaderValue(0, stream.Length);
+            if (response2.StatusCode is < HttpStatusCode.OK or >= HttpStatusCode.BadRequest)
+                throw new RegistryApiException(
+                    new RegistryApiResponse<string>(
+                        response2.StatusCode,
+                        null,
+                        response.Headers));
 
-                    var request = new HttpRequestMessage(
-                        new HttpMethod("PATCH"),
-                        location + $"&digest={digest}")
-                    {
-                        Content = content
-                    };
-
-                    var response2 = await client.SendAsync(request, cancellationToken);
-
-                    if (response2.StatusCode < HttpStatusCode.OK
-                        || response2.StatusCode >= HttpStatusCode.BadRequest)
-                        throw new RegistryApiException(
-                            new RegistryApiResponse<string>(
-                                response2.StatusCode,
-                                null,
-                                response.Headers));
-
-                    progressResponse = await client.GetAsync(location, cancellationToken);
-                }
-
-                ////{
-
-                ////    var queryString = new QueryString();
-
-                ////    queryString.Add("digest", digest);
-
-                ////    var content = new StreamContent(stream);
-
-                ////    content.Headers.ContentLength = 0;
-                ////    content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-                ////    //content.Headers.ContentRange = new ContentRangeHeaderValue(0, stream.Length);
-
-                ////    await _client.MakeRequestAsync(cancellationToken, HttpMethod.Put, $"v2/{name}/blobs/uploads/{uuid}",
-                ////        queryString);
-                ////}
-
-                //using (var client = new HttpClient())
-                //{
-                //    var content = new StringContent("");
-
-                //    content.Headers.ContentLength = 0;
-                //    //content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-
-                //    var request = new HttpRequestMessage(HttpMethod.Put, new Uri($"http://10.0.4.44:5000/v2/{name}/blobs/uploads/{uuid}&digest={digest}"))
-                //    {
-                //        Content = content
-                //    };
-
-                //    var response2 = await client.SendAsync(request, cancellationToken);
-
-                //    //content.Headers.ContentRange = new ContentRangeHeaderValue(0, stream.Length);
-
-                //    if (response2.StatusCode < HttpStatusCode.OK || response2.StatusCode >= HttpStatusCode.BadRequest)
-                //    {
-                //        throw new RegistryApiException(new RegistryApiResponse<string>(response2.StatusCode, null, response.Headers));
-                //    }
-                //}
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine("Attempting to cancel the upload...");
-
-                await this._client.MakeRequestAsync(
-                    cancellationToken,
-                    HttpMethod.Delete,
-                    $"v2/{name}/blobs/uploads/{uuid}");
-
-                throw;
-            }
-
-            //string path2 = $"v2/{name}/blobs/uploads/{uuid}";
-
-            //var response2 = await _client.MakeRequestAsync(cancellationToken, HttpMethod.Put, path2, queryString);
-
-            //await _client.MakeRequestAsync(cancellationToken, HttpMethod.Put, location, queryString);
+            progressResponse = await blobClient.GetAsync(location, token);
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            Console.WriteLine("Attempting to cancel the upload...");
+
+            await client.MakeRequest(
+                HttpMethod.Delete,
+                $"{client.RegistryVersion}/{name}/blobs/uploads/{uuid}",
+                token: token);
+
+            throw;
+        }
+    }
 }

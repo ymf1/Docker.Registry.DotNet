@@ -23,12 +23,12 @@ public class PasswordOAuthAuthenticationProvider(string username, string passwor
 
     private static string Schema { get; } = "Bearer";
 
-    public override Task AuthenticateAsync(HttpRequestMessage request)
+    public override Task Authenticate(HttpRequestMessage request)
     {
             return Task.CompletedTask;
         }
 
-    public override async Task AuthenticateAsync(
+    public override async Task Authenticate(
         HttpRequestMessage request,
         HttpResponseMessage response)
     {
@@ -37,7 +37,7 @@ public class PasswordOAuthAuthenticationProvider(string username, string passwor
             //Get the bearer bits
             var bearerBits = AuthenticateParser.ParseTyped(header.Parameter);
 
-            string scope = null;
+            string? scope = null;
 
             if (!string.IsNullOrWhiteSpace(bearerBits.Scope))
             {
@@ -47,7 +47,7 @@ public class PasswordOAuthAuthenticationProvider(string username, string passwor
             }
 
             //Get the token
-            var token = await this._client.GetTokenAsync(
+            var token = await this._client.GetToken(
                 bearerBits.Realm,
                 bearerBits.Service,
                 scope,
