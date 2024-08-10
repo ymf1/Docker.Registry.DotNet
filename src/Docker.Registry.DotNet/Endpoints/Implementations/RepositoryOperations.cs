@@ -17,6 +17,9 @@ using Newtonsoft.Json.Converters;
 
 namespace Docker.Registry.DotNet.Endpoints.Implementations;
 
+/// <summary>
+/// Operations on the Docker Repository.
+/// </summary>
 public interface IRepositoryOperations
 {
     Task<ListRepositoryTagsResponse> ListRepositoryTags(
