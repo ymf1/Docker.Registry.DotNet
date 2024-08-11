@@ -11,7 +11,7 @@ public class RepositoryTag
     public int Id { get; set; }
 
     [JsonProperty("images")]
-    public List<RepositoryTagImage> Images { get; set; }
+    public List<RepositoryTagImage> Images { get; set; } = new List<RepositoryTagImage>();
 
     [JsonProperty("last_updated")]
     [JsonConverter(typeof(IsoDateTimeConverter))]
@@ -21,10 +21,10 @@ public class RepositoryTag
     public int LastUpdater { get; set; }
 
     [JsonProperty("last_updater_username")]
-    public string LastUpdaterUsername { get; set; }
+    public string? LastUpdaterUsername { get; set; }
 
     [JsonProperty("name")]
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     [JsonProperty("repository")]
     public int Repository { get; set; }
@@ -36,7 +36,7 @@ public class RepositoryTag
     public bool V2 { get; set; }
 
     [JsonProperty("tag_status")]
-    public string TagStatus { get; set; }
+    public string? TagStatus { get; set; }
 
     [JsonProperty("tag_last_pulled")]
     [JsonConverter(typeof(IsoDateTimeConverter))]
@@ -47,11 +47,11 @@ public class RepositoryTag
     public DateTime TagLastPushed { get; set; }
 
     [JsonProperty("media_type")]
-    public string MediaType { get; set; }
+    public string? MediaType { get; set; }
 
     [JsonProperty("content_type")]
-    public string ContentType { get; set; }
+    public string? ContentType { get; set; }
 
     [JsonProperty("digest")]
-    public string Digest { get; set; }
+    public string? Digest { get; set; }
 }

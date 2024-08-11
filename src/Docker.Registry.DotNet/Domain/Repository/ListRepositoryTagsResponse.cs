@@ -9,7 +9,7 @@ public class ListRepositoryTagsResponse
     public string Next { get; set; }
 
     [JsonProperty("previous")]
-    public object Previous { get; set; }
+    public string Previous { get; set; }
 
     [JsonProperty("results")]
     public List<RepositoryTag> Tags { get; set; }

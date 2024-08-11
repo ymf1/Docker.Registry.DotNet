@@ -49,7 +49,7 @@ internal static class HttpUtility
     /// <param name="response"></param>
     /// <param name="name"></param>
     /// <returns>The first value if one is found, null otherwise.</returns>
-    public static string GetHeader(this RegistryApiResponse response, string name)
+    public static string? GetHeader(this RegistryApiResponse response, string name)
     {
         if (response == null) throw new ArgumentNullException(nameof(response));
 
@@ -64,7 +64,7 @@ internal static class HttpUtility
     /// <param name="headers"></param>
     /// <param name="name"></param>
     /// <returns>The first value if one is found, null otherwise.</returns>
-    public static string[] GetHeaders(
+    public static string?[] GetHeaders(
         this IEnumerable<KeyValuePair<string, string[]>> headers,
         string name)
     {
@@ -106,7 +106,7 @@ internal static class HttpUtility
         return null;
     }
 
-    public static string GetString(
+    public static string? GetString(
         this HttpResponseHeaders responseHeaders,
         string name)
     {

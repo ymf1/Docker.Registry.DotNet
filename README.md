@@ -18,15 +18,49 @@ dotnet add package Docker.Registry.DotNet
 ```
 
 # Usage
+
+### Local Hub
+
 ```csharp
 var configuration = new RegistryClientConfiguration("http://localhost:5000");
+
+//configuration.UsePasswordOAuthAuthentication("username", "password")
 
 using (var client = configuration.CreateClient())
 {
     // get catalog
-    var catalog = await await client.Catalog.GetCatalog();
+    var catalog = await client.Catalog.GetCatalog();
 
     // list tags for the first catalog
     var tags = await client.Tags.ListTags(catalog?.Repositories.FirstOrDefault());
+}
+```
+
+### Remote Hub with Authentication
+
+```csharp
+var configuration = new RegistryClientConfiguration("https://proget.mycompany.com");
+
+configuration.UsePasswordOAuthAuthentication("username", "password")
+
+using (var client = configuration.CreateClient())
+{
+    // get catalog
+    var catalog = await client.Catalog.GetCatalog();
+
+    // list tags for the first catalog
+    var tags = await client.Tags.ListTags(catalog?.Repositories.FirstOrDefault());
+}
+```
+
+### Docker Hub
+
+```csharp
+var configuration = new RegistryClientConfiguration("https://hub.docker.com");
+
+using (var client = configuration.CreateClient())
+{
+    // load respository
+    var tags = await client.Repository.ListRepositoryTags("grafana", "loki-docker-driver");
 }
 ```

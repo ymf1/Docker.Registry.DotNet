@@ -67,21 +67,30 @@ internal class OAuthClient
 
         activity?.AddEvent(new ActivityEvent("Getting Token"));
 
-        using var response = await _client.SendAsync(request, token);
-
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            activity?.AddEvent(new ActivityEvent("Failed to Authenticate"));
+            using var response = await _client.SendAsync(request, token);
 
-            throw new UnauthorizedAccessException(
-                $"Unable to authenticate: {await response.Content.ReadAsStringAsyncWithCancellation(token)}");
+            if (!response.IsSuccessStatusCode)
+            {
+                activity?.AddEvent(new ActivityEvent("Failed to Authenticate"));
+
+                throw new UnauthorizedAccessException(
+                    $"Unable to authenticate: {await response.Content.ReadAsStringAsyncWithCancellation(token)}");
+            }
+
+            var body = await response.Content.ReadAsStringAsyncWithCancellation(token);
+
+            var authToken = JsonConvert.DeserializeObject<OAuthToken>(body);
+
+            return authToken;
         }
+        catch (Exception ex)
+        {
+            activity?.AddTag("Authentication Exception", ex);
 
-        var body = await response.Content.ReadAsStringAsyncWithCancellation(token);
-
-        var authToken = JsonConvert.DeserializeObject<OAuthToken>(body);
-
-        return authToken;
+            throw new UnauthorizedAccessException($"Unable to authenticate: {ex}");
+        }
     }
 
     public Task<OAuthToken?> GetToken(

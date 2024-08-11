@@ -36,7 +36,7 @@ internal class JsonSerializer
         }
     };
 
-    public T DeserializeObject<T>(string json)
+    public T? DeserializeObject<T>(string json)
     {
         return JsonConvert.DeserializeObject<T>(json, Settings);
     }

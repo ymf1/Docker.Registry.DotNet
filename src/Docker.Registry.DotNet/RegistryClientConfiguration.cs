@@ -23,9 +23,9 @@ public class RegistryClientConfiguration
 
     public RegistryClientConfiguration(string baseAddress, TimeSpan defaultTimeout = default)
     {
-        var valid = Uri.TryCreate(baseAddress, UriKind.Absolute, out var parsedBaseAddress);
+        var isValidUri  = Uri.TryCreate(baseAddress, UriKind.Absolute, out var parsedBaseAddress);
 
-        if (valid) this.SetBaseAddress(parsedBaseAddress);
+        if (isValidUri ) this.SetBaseAddress(parsedBaseAddress);
         else throw new ArgumentException("BaseAddress is not a valid Uri", nameof(baseAddress));
 
         this.SetDefaultTimeout(defaultTimeout);
@@ -75,7 +75,7 @@ public class RegistryClientConfiguration
         if (baseAddress.Scheme is not ("http" or "https"))
             throw new ArgumentOutOfRangeException(
                 nameof(this.BaseAddress),
-                "Base Address Uri must start with http:// or https://");
+                "BaseAddress must use either http or https schema.");
 
         this.BaseAddress = baseAddress;
 

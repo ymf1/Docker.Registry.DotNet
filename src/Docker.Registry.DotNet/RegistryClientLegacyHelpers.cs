@@ -224,7 +224,7 @@ public static class RegistryClientLegacyHelpers
     }
 
     [Obsolete("Use CancelBlobUpload() instead")]
-    public static Task CompleteBlobUploadAsync(
+    public static Task CancelBlobUploadAsync(
         this IBlobUploadOperations operations,
         string name,
         string uuid,
