@@ -13,6 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+using Docker.Registry.DotNet.Domain.Configuration;
+
 namespace Docker.Registry.DotNet;
 
 public class RegistryClientConfiguration
@@ -60,11 +62,6 @@ public class RegistryClientConfiguration
         {
             if (value != this._defaultTimeout && value != default)
             {
-                if (value < Timeout.InfiniteTimeSpan)
-                    throw new ArgumentException(
-                        "Timeout must be less than Timeout.Infinite",
-                        nameof(this.DefaultTimeout));
-
                 this._defaultTimeout = value;
             }
         }
@@ -76,11 +73,9 @@ public class RegistryClientConfiguration
             throw new ArgumentException("BaseAddress cannot be null.", nameof(this.BaseAddress));
 
         if (baseAddress.Scheme is not ("http" or "https"))
-        {
             throw new ArgumentOutOfRangeException(
-                nameof(BaseAddress),
+                nameof(this.BaseAddress),
                 "Base Address Uri must start with http:// or https://");
-        }
 
         this.BaseAddress = baseAddress;
 
@@ -105,25 +100,24 @@ public class RegistryClientConfiguration
     ///     Defaults to AnonymousOAuthAuthenticationProvider
     /// </summary>
     public RegistryClientConfiguration SetAuthenticationProvider(
-        AuthenticationProvider authenticationProvider)
+        AuthenticationProvider? authenticationProvider)
     {
         this.AuthenticationProvider = authenticationProvider
-                                      ?? throw new ArgumentNullException(
-                                          nameof(authenticationProvider));
+                                      ?? new AnonymousOAuthAuthenticationProvider();
 
         return this;
     }
 
-    private void RunValidationRules()
+    public IRegistryClient CreateClient()
     {
         if (this.BaseAddress == null)
             throw new ArgumentException("BaseAddress cannot be null.", nameof(this.BaseAddress));
-    }
 
-    public IRegistryClient CreateClient()
-    {
-        this.RunValidationRules();
-
-        return new RegistryClient(this, this.AuthenticationProvider);
+        return new RegistryClient(
+            new FrozenRegistryClientConfigurationImpl(
+                this.BaseAddress,
+                this.HttpMessageHandler,
+                this.AuthenticationProvider,
+                this.DefaultTimeout));
     }
 }

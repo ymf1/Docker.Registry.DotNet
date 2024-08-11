@@ -20,8 +20,10 @@ public class BasicAuthenticationProvider(string username, string password) : Aut
 {
     private static string Schema { get; } = "Basic";
 
-    public override Task Authenticate(HttpRequestMessage request)
+    public override Task Authenticate(HttpRequestMessage request, IRegistryUriBuilder uriBuilder)
     {
+        using var activity = Assembly.Source.StartActivity("BasicAuthenticationProvider.Authenticate(request)");
+
         return Task.CompletedTask;
     }
 
@@ -30,6 +32,8 @@ public class BasicAuthenticationProvider(string username, string password) : Aut
         HttpResponseMessage response,
         IRegistryUriBuilder uriBuilder)
     {
+        using var activity = Assembly.Source.StartActivity("BasicAuthenticationProvider.Authenticate(request, response)");
+
         this.TryGetSchemaHeader(response, Schema);
 
         var passBytes = Encoding.UTF8.GetBytes($"{username}:{password}");

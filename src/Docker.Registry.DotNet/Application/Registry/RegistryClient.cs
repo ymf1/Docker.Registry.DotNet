@@ -15,6 +15,7 @@
 
 using Docker.Registry.DotNet.Application.Endpoints;
 using Docker.Registry.DotNet.Domain;
+using Docker.Registry.DotNet.Domain.Configuration;
 using Docker.Registry.DotNet.Domain.QueryStrings;
 
 namespace Docker.Registry.DotNet.Application.Registry;
@@ -24,11 +25,9 @@ public class RegistryClient : IRegistryClient
     private static readonly TimeSpan _infiniteTimeout =
         TimeSpan.FromMilliseconds(Timeout.Infinite);
 
-    private readonly AuthenticationProvider _authenticationProvider;
-
     private readonly HttpClient _client;
 
-    private readonly RegistryClientConfiguration _configuration;
+    private readonly IFrozenRegistryClientConfiguration _configuration;
 
     private readonly IEnumerable<Action<RegistryApiResponse>> _errorHandlers =
         new Action<RegistryApiResponse>[]
@@ -43,20 +42,20 @@ public class RegistryClient : IRegistryClient
     internal IRegistryUriBuilder? UriBuilder;
 
     public RegistryClient(
-        RegistryClientConfiguration configuration,
-        AuthenticationProvider authenticationProvider)
+        IFrozenRegistryClientConfiguration configuration)
     {
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-        if (authenticationProvider == null) throw new ArgumentNullException(nameof(authenticationProvider));
-        if (configuration.BaseAddress == null) throw new ArgumentNullException(nameof(configuration.BaseAddress));
+        if (configuration.AuthenticationProvider == null)
+            throw new ArgumentNullException(nameof(configuration.AuthenticationProvider));
+        if (configuration.BaseAddress == null)
+            throw new ArgumentNullException(nameof(configuration.BaseAddress));
 
-        this._authenticationProvider = authenticationProvider;
+        this._configuration = configuration;
         this._client = configuration.HttpMessageHandler is null
             ? new HttpClient()
             : new HttpClient(configuration.HttpMessageHandler);
-        this._configuration = configuration;
         this.UriBuilder = new RegistryUriBuilder(configuration.BaseAddress);
-        
+
         this.Manifest = new ManifestOperations(this);
         this.Catalog = new CatalogOperations(this);
         this.Blobs = new BlobOperations(this);
@@ -66,29 +65,14 @@ public class RegistryClient : IRegistryClient
         this.Repository = new RepositoryOperations(this);
     }
 
+    private AuthenticationProvider AuthenticationProvider =>
+        this._configuration.AuthenticationProvider;
+
     internal string RegistryVersion => DockerRegistryConstants.RegistryVersion;
 
     internal TimeSpan DefaultTimeout => this._configuration.DefaultTimeout;
 
     internal JsonSerializer JsonSerializer { get; } = new();
-
-    #region Operations
-
-    public IRepositoryOperations Repository { get; set; }
-
-    public IBlobUploadOperations BlobUploads { get; }
-
-    public IManifestOperations Manifest { get; }
-
-    public ICatalogOperations Catalog { get; }
-
-    public IBlobOperations Blobs { get; }
-
-    public ITagOperations Tags { get; }
-
-    public ISystemOperations System { get; } 
-
-    #endregion
 
     public void Dispose()
     {
@@ -195,9 +179,9 @@ public class RegistryClient : IRegistryClient
         if (this.UriBuilder == null)
             throw new ArgumentNullException(nameof(this.UriBuilder), "Could not find URI builder");
 
-        var builtUri = this.UriBuilder.Build(path, queryString);
+        using var activity = Assembly.Source.StartActivity("RegistryClient.InternalMakeRequestAsync()");
 
-        Debug.WriteLine($"Built URI: {builtUri}");
+        var builtUri = this.UriBuilder.Build(path, queryString);
 
         var request = this.PrepareRequest(method, builtUri, headers, content);
 
@@ -209,7 +193,9 @@ public class RegistryClient : IRegistryClient
             cancellationToken = timeoutTokenSource.Token;
         }
 
-        await this._authenticationProvider.Authenticate(request);
+        await this.AuthenticationProvider.Authenticate(request, this.UriBuilder);
+
+        activity?.AddEvent(new ActivityEvent($"Sending Request to: {request.RequestUri}"));
 
         var response = await this._client.SendAsync(
             request,
@@ -218,11 +204,13 @@ public class RegistryClient : IRegistryClient
 
         if (response.StatusCode != HttpStatusCode.Unauthorized) return response;
 
+        activity?.AddEvent(new ActivityEvent("Authorization Challenged"));
+
         //Prepare another request (we can't reuse the same request)
         var request2 = this.PrepareRequest(method, builtUri, headers, content);
 
         //Authenticate given the challenge
-        await this._authenticationProvider.Authenticate(request2, response, this.UriBuilder);
+        await this.AuthenticationProvider.Authenticate(request2, response, this.UriBuilder);
 
         //Send it again
         response = await this._client.SendAsync(
@@ -261,7 +249,7 @@ public class RegistryClient : IRegistryClient
     {
         var request = new HttpRequestMessage(method, uri);
 
-        request.Headers.Add("User-Agent", DockerRegistryConstants.UserAgent);
+        request.Headers.Add("User-Agent", DockerRegistryConstants.Name);
         request.Headers.AddRange(headers);
 
         //Create the content
@@ -269,4 +257,22 @@ public class RegistryClient : IRegistryClient
 
         return request;
     }
+
+    #region Operations
+
+    public IRepositoryOperations Repository { get; set; }
+
+    public IBlobUploadOperations BlobUploads { get; }
+
+    public IManifestOperations Manifest { get; }
+
+    public ICatalogOperations Catalog { get; }
+
+    public IBlobOperations Blobs { get; }
+
+    public ITagOperations Tags { get; }
+
+    public ISystemOperations System { get; }
+
+    #endregion
 }

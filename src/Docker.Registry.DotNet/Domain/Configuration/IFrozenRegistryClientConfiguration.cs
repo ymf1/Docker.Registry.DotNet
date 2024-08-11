@@ -13,13 +13,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-namespace Docker.Registry.DotNet.Domain;
+namespace Docker.Registry.DotNet.Domain.Configuration;
 
-public class DockerRegistryConstants
+public interface IFrozenRegistryClientConfiguration
 {
-    public const string RegistryVersion = "v2";
+    Uri? BaseAddress { get; }
 
-    public const string Name = "Docker.Registry.DotNet";
+    HttpMessageHandler? HttpMessageHandler { get; }
+    AuthenticationProvider AuthenticationProvider { get; }
 
-    public const string Version = "1.3.0";
+    TimeSpan DefaultTimeout { get; }
 }

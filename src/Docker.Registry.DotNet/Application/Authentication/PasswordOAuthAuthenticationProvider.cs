@@ -25,8 +25,10 @@ public class PasswordOAuthAuthenticationProvider(string username, string passwor
 
     private static string Schema { get; } = "Bearer";
 
-    public override Task Authenticate(HttpRequestMessage request)
+    public override Task Authenticate(HttpRequestMessage request, IRegistryUriBuilder uriBuilder)
     {
+        using var activity = Assembly.Source.StartActivity("PasswordOAuthAuthenticationProvider.Authenticate(request)");
+
         return Task.CompletedTask;
     }
 
@@ -35,6 +37,8 @@ public class PasswordOAuthAuthenticationProvider(string username, string passwor
         HttpResponseMessage response,
         IRegistryUriBuilder uriBuilder)
     {
+        using var activity = Assembly.Source.StartActivity("PasswordOAuthAuthenticationProvider.Authenticate(request, response)");
+
         var header = this.TryGetSchemaHeader(response, Schema);
 
         //Get the bearer bits

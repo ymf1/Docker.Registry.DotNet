@@ -25,7 +25,7 @@ public static class RegistryClientConfigurationExtensions
         if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
         configuration.SetAuthenticationProvider(
-            new PasswordOAuthAuthenticationProvider(username, password));
+            new BasicAuthenticationProvider(username, password));
 
         return configuration;
     }
@@ -39,27 +39,6 @@ public static class RegistryClientConfigurationExtensions
 
         configuration.SetAuthenticationProvider(
             new PasswordOAuthAuthenticationProvider(username, password));
-
-        return configuration;
-    }
-
-    /// <summary>
-    /// Supports Docker Hub Authentication.
-    /// </summary>
-    /// <param name="configuration"></param>
-    /// <param name="username"></param>
-    /// <param name="password"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    public static RegistryClientConfiguration UseDockerHubAuthentication(
-        this RegistryClientConfiguration configuration,
-        string username,
-        string password)
-    {
-        if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-
-        configuration.SetAuthenticationProvider(
-            new DockerHubJwtAuthenticationProvider(username, password));
 
         return configuration;
     }

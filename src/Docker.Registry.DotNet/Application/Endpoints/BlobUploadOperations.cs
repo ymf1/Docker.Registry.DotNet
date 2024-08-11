@@ -193,14 +193,9 @@ internal class BlobUploadOperations(RegistryClient client) : IBlobUploadOperatio
             token: token);
 
         var uuid = response.Headers.GetString("Docker-Upload-UUID");
-
-        Debug.WriteLine($"Uploading with uuid: {uuid}");
-
         var location = response.Headers.GetString("Location");
 
-        Debug.WriteLine($"Using location: {location}");
-
-        //await GetBlobUploadStatus(name, uuid, cancellationToken);
+        //await GetBlobUploadStatus(name, uuid, token);
 
         try
         {

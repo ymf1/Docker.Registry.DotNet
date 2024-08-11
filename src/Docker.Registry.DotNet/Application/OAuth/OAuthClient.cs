@@ -29,6 +29,8 @@ internal class OAuthClient
         string? password,
         CancellationToken token = default)
     {
+        using var activity = Assembly.Source.StartActivity("OAuthClient.GetTokenInner()");
+
         HttpRequestMessage request;
 
         if (username == null || password == null)
@@ -63,12 +65,14 @@ internal class OAuthClient
             };
         }
 
-        Debug.WriteLine("OAuth Client GetToken");
+        activity?.AddEvent(new ActivityEvent("Getting Token"));
 
         using var response = await _client.SendAsync(request, token);
 
         if (!response.IsSuccessStatusCode)
         {
+            activity?.AddEvent(new ActivityEvent("Failed to Authenticate"));
+
             throw new UnauthorizedAccessException(
                 $"Unable to authenticate: {await response.Content.ReadAsStringAsyncWithCancellation(token)}");
         }

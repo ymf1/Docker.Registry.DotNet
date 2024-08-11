@@ -21,14 +21,15 @@ namespace Docker.Registry.DotNet.Application.Authentication;
 public abstract class AuthenticationProvider
 {
     /// <summary>
-    ///     Called on the initial send
+    ///     Called on initial connection
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="uriBuilder"></param>
     /// <returns></returns>
-    public abstract Task Authenticate(HttpRequestMessage request);
+    public abstract Task Authenticate(HttpRequestMessage request, IRegistryUriBuilder uriBuilder);
 
     /// <summary>
-    ///     Called when the send is challenged.
+    ///     Called when connection is challenged.
     /// </summary>
     /// <param name="request"></param>
     /// <param name="response"></param>

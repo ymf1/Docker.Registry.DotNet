@@ -24,8 +24,10 @@ public class AnonymousOAuthAuthenticationProvider : AuthenticationProvider
 
     private static string Schema { get; } = "Bearer";
 
-    public override Task Authenticate(HttpRequestMessage request)
+    public override Task Authenticate(HttpRequestMessage request, IRegistryUriBuilder uriBuilder)
     {
+        using var activity = Assembly.Source.StartActivity("AnonymousOAuthAuthenticationProvider.Authenticate(request)");
+
         return Task.CompletedTask;
     }
 
@@ -34,6 +36,8 @@ public class AnonymousOAuthAuthenticationProvider : AuthenticationProvider
         HttpResponseMessage response,
         IRegistryUriBuilder uriBuilder)
     {
+        using var activity = Assembly.Source.StartActivity("AnonymousOAuthAuthenticationProvider.Authenticate(request, response)");
+
         var header = this.TryGetSchemaHeader(response, Schema);
 
         //Get the bearer bits

@@ -19,6 +19,8 @@ public class RegistryUriBuilder(Uri baseUri) : IRegistryUriBuilder
 {
     public virtual Uri Build(string? path = null, string? queryString = null)
     {
+        using var activity = Assembly.Source.StartActivity("RegistryUriBuilder.Build()");
+
         var pathIsUri = false;
 
         path = path?.Trim() ?? string.Empty;
