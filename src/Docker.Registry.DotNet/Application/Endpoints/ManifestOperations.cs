@@ -49,35 +49,31 @@ internal class ManifestOperations(RegistryClient client) : IManifestOperations
 
         var contentType = this.GetContentType(response.GetHeader("ContentType"), response.Body);
 
-        switch (contentType)
+        return contentType switch
         {
-            case ManifestMediaTypes.ManifestSchema1:
-            case ManifestMediaTypes.ManifestSchema1Signed:
-                return new GetImageManifestResult(
+            ManifestMediaTypes.ManifestSchema1 or ManifestMediaTypes.ManifestSchema1Signed => new
+                GetImageManifestResult(
                     contentType,
                     client.JsonSerializer.DeserializeObject<ImageManifest2_1>(response.Body),
                     response.Body)
                 {
                     DockerContentDigest = response.GetHeader("Docker-Content-Digest"),
                     Etag = response.GetHeader("Etag")
-                };
-
-            case ManifestMediaTypes.ManifestSchema2:
-                return new GetImageManifestResult(
-                        contentType,
-                        client.JsonSerializer.DeserializeObject<ImageManifest2_2>(response.Body),
-                        response.Body)
-                    { DockerContentDigest = response.GetHeader("Docker-Content-Digest") };
-
-            case ManifestMediaTypes.ManifestList:
-                return new GetImageManifestResult(
-                    contentType,
-                    client.JsonSerializer.DeserializeObject<ManifestList>(response.Body),
-                    response.Body);
-
-            default:
-                throw new Exception($"Unexpected ContentType '{contentType}'.");
-        }
+                },
+            ManifestMediaTypes.ManifestSchema2 => new GetImageManifestResult(
+                contentType,
+                client.JsonSerializer.DeserializeObject<ImageManifest2_2>(response.Body),
+                response.Body)
+            {
+                DockerContentDigest = response.GetHeader("Docker-Content-Digest")
+            },
+            ManifestMediaTypes.ManifestList => new GetImageManifestResult(
+                contentType,
+                client.JsonSerializer.DeserializeObject<ManifestList>(response.Body),
+                response.Body),
+            _ => throw new UnknownManifestContentTypeException(
+                $"Unexpected ContentType '{contentType}'.")
+        };
     }
 
     public async Task<PushManifestResponse> PutManifest(
