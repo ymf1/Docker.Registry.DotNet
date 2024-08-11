@@ -20,14 +20,15 @@ namespace Docker.Registry.DotNet.Application.Endpoints;
 
 internal class ManifestOperations(RegistryClient client) : IManifestOperations
 {
-    static readonly IReadOnlyDictionary<string, string> _manifestHeaders = new Dictionary<string, string>
-    {
+    private static readonly IReadOnlyDictionary<string, string> _manifestHeaders =
+        new Dictionary<string, string>
         {
-            "Accept",
-            $"{ManifestMediaTypes.ManifestSchema1}, {ManifestMediaTypes.ManifestSchema2}, {
-                ManifestMediaTypes.ManifestList}, {ManifestMediaTypes.ManifestSchema1Signed}"
-        }
-    };
+            {
+                "Accept",
+                $"{ManifestMediaTypes.ManifestSchema1}, {ManifestMediaTypes.ManifestSchema2}, {
+                    ManifestMediaTypes.ManifestList}, {ManifestMediaTypes.ManifestSchema1Signed}"
+            }
+        };
 
     public async Task<GetImageManifestResult> GetManifest(
         string name,
@@ -36,25 +37,17 @@ internal class ManifestOperations(RegistryClient client) : IManifestOperations
     {
         ImageDigest? digestReference = null;
 
-        if (reference.IsTag)
-        {
-            digestReference = await GetDigest(name, reference.Tag!, token);
-        }
-        else if (reference.IsDigest)
-        {
-            digestReference = reference.Digest;
-        }
+        if (reference.IsTag) digestReference = await this.GetDigest(name, reference.Tag!, token);
+        else if (reference.IsDigest) digestReference = reference.Digest;
 
         if (digestReference == null)
-        {
             throw new ArgumentNullException(
                 nameof(digestReference),
                 @$"Failed getting the digest reference for ""{reference}""");
-        }
 
-        var response = await MakeManifestRequest(name, digestReference.ToReference(), token);
+        var response = await this.MakeManifestRequest(name, digestReference.ToReference(), token);
 
-        var contentType = GetContentType(response.GetHeader("ContentType"), response.Body);
+        var contentType = this.GetContentType(response.GetHeader("ContentType"), response.Body);
 
         switch (contentType)
         {
@@ -71,10 +64,10 @@ internal class ManifestOperations(RegistryClient client) : IManifestOperations
 
             case ManifestMediaTypes.ManifestSchema2:
                 return new GetImageManifestResult(
-                    contentType,
-                    client.JsonSerializer.DeserializeObject<ImageManifest2_2>(response.Body),
-                    response.Body)
-                { DockerContentDigest = response.GetHeader("Docker-Content-Digest") };
+                        contentType,
+                        client.JsonSerializer.DeserializeObject<ImageManifest2_2>(response.Body),
+                        response.Body)
+                    { DockerContentDigest = response.GetHeader("Docker-Content-Digest") };
 
             case ManifestMediaTypes.ManifestList:
                 return new GetImageManifestResult(
@@ -93,13 +86,13 @@ internal class ManifestOperations(RegistryClient client) : IManifestOperations
         ImageManifest manifest,
         CancellationToken token)
     {
-        string? manifestMediaType = null;
-        if (manifest is ImageManifest2_1)
-            manifestMediaType = ManifestMediaTypes.ManifestSchema1;
-        if (manifest is ImageManifest2_2)
-            manifestMediaType = ManifestMediaTypes.ManifestSchema2;
-        if (manifest is ManifestList)
-            manifestMediaType = ManifestMediaTypes.ManifestList;
+        var manifestMediaType = manifest switch
+        {
+            ImageManifest2_1 => ManifestMediaTypes.ManifestSchema1,
+            ImageManifest2_2 => ManifestMediaTypes.ManifestSchema2,
+            ManifestList => ManifestMediaTypes.ManifestList,
+            _ => null
+        };
 
         var response = await client.MakeRequest(
             HttpMethod.Put,
@@ -120,7 +113,10 @@ internal class ManifestOperations(RegistryClient client) : IManifestOperations
         };
     }
 
-    public async Task DeleteManifest(string name, ImageReference reference, CancellationToken token = default)
+    public async Task DeleteManifest(
+        string name,
+        ImageReference reference,
+        CancellationToken token = default)
     {
         var path = $"{client.RegistryVersion}/{name}/manifests/{reference}";
 
@@ -133,14 +129,17 @@ internal class ManifestOperations(RegistryClient client) : IManifestOperations
         ImageReference reference,
         CancellationToken token)
     {
-        var response = await MakeManifestRequest(name, reference, token);
+        var response = await this.MakeManifestRequest(name, reference, token);
 
         return response.Body;
     }
 
-    public async Task<ImageDigest?> GetDigest(string name, ImageTag tag, CancellationToken token = default)
+    public async Task<ImageDigest?> GetDigest(
+        string name,
+        ImageTag tag,
+        CancellationToken token = default)
     {
-        var response = await MakeManifestRequest(name, tag.ToReference(), token);
+        var response = await this.MakeManifestRequest(name, tag.ToReference(), token);
 
         var digestValue = response.GetHeader("Docker-Content-Digest");
 
@@ -176,7 +175,8 @@ internal class ManifestOperations(RegistryClient client) : IManifestOperations
         if (check.SchemaVersion.Value == 2)
             return ManifestMediaTypes.ManifestSchema2;
 
-        throw new Exception($"Unable to determine schema type from version {check.SchemaVersion}");
+        throw new ManifestSchemaVersionNotSupportedException(
+            $"Unable to determine schema type from version {check.SchemaVersion}");
     }
 
     private class SchemaCheck
