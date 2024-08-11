@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using Docker.Registry.DotNet.Authentication;
+using Docker.Registry.DotNet.Application.Authentication;
 
 using FluentAssertions;
 

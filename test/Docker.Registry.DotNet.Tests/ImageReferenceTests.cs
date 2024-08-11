@@ -13,7 +13,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-using Docker.Registry.DotNet.Domain.Tags;
+using Docker.Registry.DotNet.Domain.ImageReferences;
 
 using FluentAssertions;
 
@@ -38,9 +38,20 @@ public class ImageReferenceTests
     }
 
     [Test]
+    public void ImageReferenceWithInvalidDigestShouldFail()
+    {
+        var digest =
+            "   sha256:0d1c30c6bf461513951e4_75fe7846f9e2f25fdfec09f4be6b.9dbe639d362ca    ";
+
+        var action = () => ImageReference.Create(digest);
+
+        action.Should().Throw<ArgumentException>().WithMessage("*is invalid*");
+    }
+
+    [Test]
     public void ImageReferenceWithTagShouldWork()
     {
-        string tag = "   1.2.34.5-master    ";
+        var tag = "   1.2.34.5-master    ";
 
         var imageRef = ImageReference.Create(tag);
 
@@ -49,16 +60,6 @@ public class ImageReferenceTests
         imageRef.Tag?.ToString().Should().Be(tag.Trim());
 
         imageRef.IsTag.Should().BeTrue();
-    }
-
-    [Test]
-    public void ImageReferenceWithInvalidDigestShouldFail()
-    {
-        string digest = "   sha256:0d1c30c6bf461513951e4_75fe7846f9e2f25fdfec09f4be6b.9dbe639d362ca    ";
-
-        var action = () => ImageReference.Create(digest);
-
-        action.Should().Throw<ArgumentException>().WithMessage("*is invalid*");
     }
 
     [Test]

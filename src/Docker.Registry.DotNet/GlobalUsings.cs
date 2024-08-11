@@ -14,25 +14,22 @@
 //  limitations under the License.
 
 global using System;
-global using System.Collections.Generic;
-global using System.IO;
-global using System.Linq;
+global using System.Diagnostics;
 global using System.Net;
-global using System.Net.Http;
 global using System.Net.Http.Headers;
 global using System.Runtime.Serialization;
 global using System.Text;
-global using System.Threading;
-global using System.Threading.Tasks;
 
-global using Docker.Registry.DotNet.Authentication;
-global using Docker.Registry.DotNet.Endpoints;
-global using Docker.Registry.DotNet.Helpers;
-global using Docker.Registry.DotNet.Models;
-global using Docker.Registry.DotNet.OAuth;
-global using Docker.Registry.DotNet.QueryParameters;
-global using Docker.Registry.DotNet.Registry;
+global using Docker.Registry.DotNet.Application.Authentication;
+global using Docker.Registry.DotNet.Application.Registry;
+global using Docker.Registry.DotNet.Domain.Endpoints;
+global using Docker.Registry.DotNet.Domain.Models;
+global using Docker.Registry.DotNet.Domain.QueryParameters;
+global using Docker.Registry.DotNet.Domain.Registry;
+global using Docker.Registry.DotNet.Infrastructure.Helpers;
 
 global using JetBrains.Annotations;
 
 global using Newtonsoft.Json;
+
+global using JsonSerializer = Docker.Registry.DotNet.Infrastructure.Json.JsonSerializer;

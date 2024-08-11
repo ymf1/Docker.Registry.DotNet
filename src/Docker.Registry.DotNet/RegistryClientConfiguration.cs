@@ -1,4 +1,4 @@
-﻿//  Copyright 2017-2022 Rich Quackenbush, Jaben Cargman
+﻿//  Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
 //  and Docker.Registry.DotNet Contributors
 // 
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,68 +17,113 @@ namespace Docker.Registry.DotNet;
 
 public class RegistryClientConfiguration
 {
-    /// <summary>
-    ///     Creates an instance of the RegistryClientConfiguration.
-    /// </summary>
-    /// <param name="host"></param>
-    /// <param name="defaultTimeout"></param>
-    public RegistryClientConfiguration(string host, TimeSpan defaultTimeout = default)
-        : this(defaultTimeout)
-    {
-        if (string.IsNullOrWhiteSpace(host))
-            throw new ArgumentException("Value cannot be null or whitespace.", nameof(host));
+    private TimeSpan _defaultTimeout = TimeSpan.FromSeconds(100);
 
-        this.Host = host;
+    public RegistryClientConfiguration(string baseAddress, TimeSpan defaultTimeout = default)
+    {
+        var valid = Uri.TryCreate(baseAddress, UriKind.Absolute, out var parsedBaseAddress);
+
+        if (valid) this.SetBaseAddress(parsedBaseAddress);
+        else throw new ArgumentException("BaseAddress is not a valid Uri", nameof(baseAddress));
+
+        this.SetDefaultTimeout(defaultTimeout);
     }
 
-    /// <summary>
-    ///     Creates an instance of the RegistryClientConfiguration.
-    /// </summary>
-    /// <param name="host"></param>
-    /// <param name="httpMessageHandler"></param>
-    /// <param name="defaultTimeout"></param>
     public RegistryClientConfiguration(
-        string host,
-        HttpMessageHandler? httpMessageHandler,
+        Uri baseAddress,
+        HttpMessageHandler? httpMessageHandler = null,
         TimeSpan defaultTimeout = default)
-        : this(defaultTimeout)
     {
-        if (string.IsNullOrWhiteSpace(host))
-            throw new ArgumentException("Value cannot be null or whitespace.", nameof(host));
-
-        this.Host = host;
-        this.HttpMessageHandler = httpMessageHandler;
+        this.SetBaseAddress(baseAddress);
+        this.SetDefaultTimeout(defaultTimeout);
+        this.SetHttpMessageHandler(httpMessageHandler);
     }
 
-    private RegistryClientConfiguration(TimeSpan defaultTimeout)
+    public RegistryClientConfiguration()
     {
-        if (defaultTimeout != TimeSpan.Zero)
+    }
+
+    public Uri? BaseAddress { get; private set; }
+
+    public HttpMessageHandler? HttpMessageHandler { get; private set; }
+
+    /// <summary>
+    ///     Defaults to AnonymousOAuthAuthenticationProvider
+    /// </summary>
+    public AuthenticationProvider AuthenticationProvider { get; private set; } =
+        new AnonymousOAuthAuthenticationProvider();
+
+    public TimeSpan DefaultTimeout
+    {
+        get => this._defaultTimeout;
+        private set
         {
-            if (defaultTimeout < Timeout.InfiniteTimeSpan)
-                // TODO: Should be a resource for localization.
-                // TODO: Is this a good message?
-                throw new ArgumentException(
-                    "Timeout must be greater than Timeout.Infinite",
-                    nameof(defaultTimeout));
-            this.DefaultTimeout = defaultTimeout;
+            if (value != this._defaultTimeout && value != default)
+            {
+                if (value < Timeout.InfiniteTimeSpan)
+                    throw new ArgumentException(
+                        "Timeout must be less than Timeout.Infinite",
+                        nameof(this.DefaultTimeout));
+
+                this._defaultTimeout = value;
+            }
         }
     }
 
-    public string Host { get; }
-
-    public HttpMessageHandler? HttpMessageHandler { get; }
-
-    public TimeSpan DefaultTimeout { get; internal set; } = TimeSpan.FromSeconds(100);
-
-    [PublicAPI]
-    public IRegistryClient CreateClient()
+    public RegistryClientConfiguration SetBaseAddress(Uri baseAddress)
     {
-        return new RegistryClient(this, new AnonymousOAuthAuthenticationProvider());
+        if (baseAddress == null)
+            throw new ArgumentException("BaseAddress cannot be null.", nameof(this.BaseAddress));
+
+        if (baseAddress.Scheme is not ("http" or "https"))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(BaseAddress),
+                "Base Address Uri must start with http:// or https://");
+        }
+
+        this.BaseAddress = baseAddress;
+
+        return this;
     }
 
-    [PublicAPI]
-    public IRegistryClient CreateClient(AuthenticationProvider authenticationProvider)
+    public RegistryClientConfiguration SetDefaultTimeout(TimeSpan defaultTimeout)
     {
-        return new RegistryClient(this, authenticationProvider);
+        this.DefaultTimeout = defaultTimeout;
+
+        return this;
+    }
+
+    public RegistryClientConfiguration SetHttpMessageHandler(HttpMessageHandler? messageHandler)
+    {
+        this.HttpMessageHandler = messageHandler;
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Defaults to AnonymousOAuthAuthenticationProvider
+    /// </summary>
+    public RegistryClientConfiguration SetAuthenticationProvider(
+        AuthenticationProvider authenticationProvider)
+    {
+        this.AuthenticationProvider = authenticationProvider
+                                      ?? throw new ArgumentNullException(
+                                          nameof(authenticationProvider));
+
+        return this;
+    }
+
+    private void RunValidationRules()
+    {
+        if (this.BaseAddress == null)
+            throw new ArgumentException("BaseAddress cannot be null.", nameof(this.BaseAddress));
+    }
+
+    public IRegistryClient CreateClient()
+    {
+        this.RunValidationRules();
+
+        return new RegistryClient(this, this.AuthenticationProvider);
     }
 }
