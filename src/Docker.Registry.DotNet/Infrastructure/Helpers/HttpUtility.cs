@@ -37,7 +37,8 @@ internal static class HttpUtility
             if (string.IsNullOrWhiteSpace(builder.Query))
                 builder.Query = queryString.GetQueryString();
             else
-                builder.Query += "&" + queryString.GetQueryString();
+                builder.Query += (builder.Query.EndsWith("&") ? string.Empty : "&")
+                                 + queryString.GetQueryString();
         }
 
         return builder.Uri;
