@@ -18,18 +18,49 @@ dotnet add package Docker.Registry.DotNet
 ```
 
 # Usage
+
+### Local Hub
+
 ```csharp
-var configuration = new RegistryClientConfiguration("localhost:5000");
+var configuration = new RegistryClientConfiguration("http://localhost:5000");
+
+//configuration.UsePasswordOAuthAuthentication("username", "password")
 
 using (var client = configuration.CreateClient())
 {
-    await client.System.PingAsync();
+    // get catalog
+    var catalog = await client.Catalog.GetCatalog();
+
+    // list tags for the first catalog
+    var tags = await client.Tags.ListTags(catalog?.Repositories.FirstOrDefault());
 }
 ```
 
-# Changelog
+### Remote Hub with Authentication
 
-### v1.1.33
-* Added Basic Authentication (thanks [Zguy](https://github.com/Zguy)).
-* Fixed issue with operational parameters (thanks [lostllama](https://github.com/lostllama)).
-* Fixed issue with large manifest layers (thanks [msvprogs](https://github.com/msvprogs)).
+```csharp
+var configuration = new RegistryClientConfiguration("https://proget.mycompany.com");
+
+configuration.UsePasswordOAuthAuthentication("username", "password")
+
+using (var client = configuration.CreateClient())
+{
+    // get catalog
+    var catalog = await client.Catalog.GetCatalog();
+
+    // list tags for the first catalog
+    var tags = await client.Tags.ListTags(catalog?.Repositories.FirstOrDefault());
+}
+```
+
+### Docker Hub
+
+```csharp
+var configuration = new RegistryClientConfiguration("https://hub.docker.com");
+
+using (var client = configuration.CreateClient())
+{
+    // load respository
+    var tags = await client.Repository.ListRepositoryTags("grafana", "loki-docker-driver");
+}
+```

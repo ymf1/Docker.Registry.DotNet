@@ -4,9 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Docker.Registry.DotNet;
-using Docker.Registry.DotNet.Authentication;
-using Docker.Registry.DotNet.Models;
-using Docker.Registry.DotNet.Registry;
+using Docker.Registry.DotNet.Domain.Registry;
 
 namespace Docker.Registry.Cli
 {
