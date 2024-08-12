@@ -17,7 +17,7 @@ using Docker.Registry.DotNet.Domain.Blobs;
 
 namespace Docker.Registry.DotNet.Domain.Endpoints;
 
-[PublicAPI]
+
 public interface IBlobOperations
 {
     /// <summary>
@@ -27,7 +27,7 @@ public interface IBlobOperations
     /// <param name="digest"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    [PublicAPI]
+    
     Task<GetBlobResponse> GetBlob(
         string name,
         string digest,
@@ -40,7 +40,7 @@ public interface IBlobOperations
     /// <param name="digest"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    [PublicAPI]
+    
     Task DeleteBlob(
         string name,
         string digest,

@@ -119,7 +119,7 @@ internal class ManifestOperations(RegistryClient client) : IManifestOperations
         await client.MakeRequest(HttpMethod.Delete, path, token: token);
     }
 
-    [PublicAPI]
+    
     public async Task<string> GetManifestRaw(
         string name,
         ImageReference reference,

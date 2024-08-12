@@ -15,7 +15,7 @@
 
 namespace Docker.Registry.DotNet.Domain.Manifests;
 
-[PublicAPI]
+
 public class Manifest
 {
     /// <summary>

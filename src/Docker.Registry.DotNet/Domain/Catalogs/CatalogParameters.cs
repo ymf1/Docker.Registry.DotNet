@@ -15,7 +15,7 @@
 
 namespace Docker.Registry.DotNet.Domain.Catalogs;
 
-[PublicAPI]
+
 public class CatalogParameters
 {
     /// <summary>

@@ -21,5 +21,5 @@ public class DockerRegistryConstants
 
     public const string Name = "Docker.Registry.DotNet";
 
-    public const string Version = "1.3.0";
+    public const string Version = "2.0.0";
 }

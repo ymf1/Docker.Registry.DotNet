@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Version>1.3.0</Version>
+		<Version>2.0.0</Version>
 		<PackageId>Docker.Registry.DotNet</PackageId>
 		<Authors>Rich Quackenbush, Jaben Cargman and the Docker.Registry.DotNet Contributors</Authors>
 		<Copyright>Copyright © Rich Quackenbush, Jaben Cargman and the Docker.Registry.DotNet Contributors 2017-2022</Copyright>
@@ -17,7 +17,17 @@
 		<PackageIconUrl>https://raw.githubusercontent.com/ChangemakerStudios/Docker.Registry.DotNet/master/assets/docker_registry_dotnet.png</PackageIconUrl>
 		<PackageProjectUrl>https://github.com/ChangemakerStudios/Docker.Registry.DotNet</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/ChangemakerStudios/Docker.Registry.DotNet</RepositoryUrl>
-		<PackageReleaseNotes>Added Basic Authentication (thanks Zguy). Fixed issue with operational parameters (thanks lostllama). Fixed issue with large manifest layers (thanks msvprogs).</PackageReleaseNotes>
+		<PackageReleaseNotes>
+			* Added direct .NET 5/6/7/8 support.
+			* Switched to more DDD style configuration with a builder.
+			* Removed "Async" from the function names. But, added Legacy helpers with [Obsolete] attributes.
+			* Simplified Authentication with configuraiton builders.
+			* Added Docker Hub "registry" support.
+			* Added ITagOperation.ListTagsByDigests() that provided all tags for a specific image.
+			* More .NET Core style codebase (still can't directly inject HttpClient, though).
+			* Added ActivitySource support.
+			* Bug fixes/error handling improvements.
+		</PackageReleaseNotes>
 		<RepositoryType>git</RepositoryType>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<PackageTags>docker registry .net C# client</PackageTags>
@@ -36,7 +46,6 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="JetBrains.Annotations" Version="2024.2.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
 		<PackageReference Include="System.ValueTuple" Version="4.5.0" />

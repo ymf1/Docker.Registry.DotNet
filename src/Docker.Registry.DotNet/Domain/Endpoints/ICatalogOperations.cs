@@ -17,7 +17,7 @@ using Docker.Registry.DotNet.Domain.Catalogs;
 
 namespace Docker.Registry.DotNet.Domain.Endpoints;
 
-[PublicAPI]
+
 public interface ICatalogOperations
 {
     /// <summary>
@@ -26,7 +26,7 @@ public interface ICatalogOperations
     /// <param name="parameters"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    [PublicAPI]
+    
     Task<CatalogResponse> GetCatalog(
         CatalogParameters? parameters = null,
         CancellationToken token = default);

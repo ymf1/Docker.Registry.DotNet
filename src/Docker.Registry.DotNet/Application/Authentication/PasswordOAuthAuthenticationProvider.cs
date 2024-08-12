@@ -17,7 +17,7 @@ using Docker.Registry.DotNet.Application.OAuth;
 
 namespace Docker.Registry.DotNet.Application.Authentication;
 
-[PublicAPI]
+
 public class PasswordOAuthAuthenticationProvider(string username, string password)
     : AuthenticationProvider
 {

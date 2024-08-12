@@ -18,7 +18,7 @@ using Docker.Registry.DotNet.Domain.ImageReferences;
 
 namespace Docker.Registry.DotNet.Domain.Endpoints;
 
-[PublicAPI]
+
 public interface IBlobUploadOperations
 {
     /// <summary>
@@ -29,7 +29,7 @@ public interface IBlobUploadOperations
     /// <param name="digest"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    [PublicAPI]
+    
     Task UploadBlob(
         string name,
         int contentLength,
@@ -44,7 +44,7 @@ public interface IBlobUploadOperations
     /// <param name="parameters"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    [PublicAPI]
+    
     Task<MountResponse> MountBlob(
         string name,
         MountParameters parameters,
@@ -58,7 +58,7 @@ public interface IBlobUploadOperations
     /// <param name="uuid"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [PublicAPI]
+    
     Task<BlobUploadStatus> GetBlobUploadStatus(
         string name,
         string uuid,
@@ -73,7 +73,7 @@ public interface IBlobUploadOperations
     /// <param name="to"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    [PublicAPI]
+    
     Task<ResumableUpload> UploadBlobChunk(
         ResumableUpload resumable,
         Stream chunk,
@@ -91,7 +91,7 @@ public interface IBlobUploadOperations
     /// <param name="to"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    [PublicAPI]
+    
     Task<CompletedUploadResponse> CompleteBlobUpload(
         ResumableUpload resumable,
         ImageDigest digest,
@@ -108,7 +108,7 @@ public interface IBlobUploadOperations
     /// <param name="uuid"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    [PublicAPI]
+    
     Task CancelBlobUpload(
         string name,
         string uuid,

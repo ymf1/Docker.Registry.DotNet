@@ -1,6 +1,6 @@
 ﻿namespace Docker.Registry.DotNet.Domain.Repository;
 
-[PublicAPI]
+
 public class RepositoryTagsParameters
 {
     /// <summary>

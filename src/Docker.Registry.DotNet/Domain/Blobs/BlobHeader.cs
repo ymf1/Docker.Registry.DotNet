@@ -15,7 +15,7 @@
 
 namespace Docker.Registry.DotNet.Domain.Blobs;
 
-[PublicAPI]
+
 public class BlobHeader
 {
     internal BlobHeader(string dockerContentDigest)

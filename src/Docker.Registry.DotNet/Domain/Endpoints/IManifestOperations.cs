@@ -37,7 +37,7 @@ namespace Docker.Registry.DotNet.Domain.Endpoints;
 /// <summary>
 ///     Manifest operations.
 /// </summary>
-[PublicAPI]
+
 public interface IManifestOperations
 {
     /// <summary>
@@ -71,7 +71,7 @@ public interface IManifestOperations
     /// <param name="reference"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    [PublicAPI]
+    
     Task<GetImageManifestResult> GetManifest(string name, ImageReference reference, CancellationToken token = default);
 
     /// <summary>

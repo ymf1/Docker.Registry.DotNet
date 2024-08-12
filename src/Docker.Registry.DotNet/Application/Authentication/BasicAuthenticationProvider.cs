@@ -15,7 +15,7 @@
 
 namespace Docker.Registry.DotNet.Application.Authentication;
 
-[PublicAPI]
+
 public class BasicAuthenticationProvider(string username, string password) : AuthenticationProvider
 {
     private static string Schema { get; } = "Basic";

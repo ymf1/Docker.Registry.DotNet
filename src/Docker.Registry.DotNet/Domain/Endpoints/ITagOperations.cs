@@ -15,7 +15,7 @@
 
 namespace Docker.Registry.DotNet.Domain.Endpoints;
 
-[PublicAPI]
+
 public interface ITagOperations
 {
     Task<ListTagResponseModel> ListTags(

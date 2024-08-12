@@ -28,8 +28,6 @@ global using Docker.Registry.DotNet.Domain.QueryParameters;
 global using Docker.Registry.DotNet.Domain.Registry;
 global using Docker.Registry.DotNet.Infrastructure.Helpers;
 
-global using JetBrains.Annotations;
-
 global using Newtonsoft.Json;
 
 global using JsonSerializer = Docker.Registry.DotNet.Infrastructure.Json.JsonSerializer;
