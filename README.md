@@ -41,7 +41,7 @@ using (var client = configuration.CreateClient())
 ```csharp
 var configuration = new RegistryClientConfiguration("https://proget.mycompany.com");
 
-configuration.UsePasswordOAuthAuthentication("username", "password")
+configuration.UsePasswordOAuthAuthentication("username", "password");
 
 using (var client = configuration.CreateClient())
 {
