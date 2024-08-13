@@ -31,6 +31,9 @@ jobs:
       with:
         useConfigFile: true
         
+    - name: Run Tests
+      run: dotnet test
+    
     - name: Pack
       run: dotnet pack src/Docker.Registry.DotNet -c Release -p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersion }} -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
    
