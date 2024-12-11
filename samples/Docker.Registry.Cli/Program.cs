@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Docker.Registry.DotNet;
+using Docker.Registry.DotNet.Domain.Catalogs;
 using Docker.Registry.DotNet.Domain.Registry;
 
 namespace Docker.Registry.Cli
@@ -16,74 +17,54 @@ namespace Docker.Registry.Cli
             {
                 TestAsync().GetAwaiter().GetResult();
             }
-            catch (UnauthorizedApiException ex)
+            catch (Exception ex)
             {
-                Console.WriteLine();
-                Console.WriteLine(nameof(UnauthorizedApiException));
-                Console.WriteLine("=================================================================");
-
-                foreach (var header in ex.Headers)
-                {
-                    Console.WriteLine($"{header.Key}: {string.Join(" ,", header.Value)}");
-                }
+               
             }
         }
 
-        private static async Task TestAsync()
+        static async Task TestAsync()
         {
-            //string url = "https://registry-1.docker.io/";
-            string url = "http://10.0.4.44:5000/";
+            //http://myi.dockerregistry:30000/v2/_catalog
+            string url = "http://myi.dockerregistry:30000";
 
             var configuration = new RegistryClientConfiguration(url);
 
             using (var client = configuration.CreateClient())
             {
 
-                var bytes = File.ReadAllBytes(@"c:\layer.txt");
+               
 
-                string sha256Hash;
-
-                using (var sha = SHA256.Create())
+                var catalog = await client.Catalog.GetCatalog(new CatalogParameters()
                 {
-                    var hash = sha.ComputeHash(bytes);
+                    Number = 10
+                });
 
-                    sha256Hash = $"sha256:{string.Join("", hash.Select(b => b.ToString("x")))}";
+                var repositories = catalog.Repositories;
+
+                foreach (var repository in repositories)
+                {
+                    Console.WriteLine("-----------------------------------------------");
+                    Console.WriteLine(repository);
+                    Console.WriteLine("-----------------------------------------------");
+
+                    var tags = await client.Tags.ListImageTagsAsync(repository, new ListImageTagsParameters());
+
+                    foreach (var tag in tags.Tags)
+                    {
+                        Console.WriteLine($"  {tag}");
+                    }
                 }
 
-                using (var source = File.OpenRead(@"c:\layer.txt"))
-                {
-                   // await client.BlobUploads.UploadBlobAsync("my-repo", (int)source.Length, source, sha256Hash);
-                }
 
-                ////Console.WriteLine("Ping...");
+                //var tags = await client.Tags.ListImageTagsAsync("resin", new ListImageTagsParameters());
 
-                ////var tags = await client.Tags.ListImageTagsAsync("resin", new ListImageTagsParameters());
-
-                ////foreach (var tag in tags.Tags)
-                ////{
-                ////    Console.WriteLine();
-                ////}
-
-                //var catalog = await client.Catalog.GetCatalogAsync(new CatalogParameters()
+                //foreach (var tag in tags.Tags)
                 //{
-                //    Number = 10
-                //});
-
-                //var repositories = catalog.Repositories;
-
-                //foreach (var repository in repositories)
-                //{
-                //    Console.WriteLine("-----------------------------------------------");
-                //    Console.WriteLine(repository);
-                //    Console.WriteLine("-----------------------------------------------");
-
-                //    var tags = await client.Tags.ListImageTagsAsync(repository, new ListImageTagsParameters());
-
-                //    foreach (var tag in tags.Tags)
-                //    {
-                //        Console.WriteLine($"  {tag}");
-                //    }
+                //    Console.WriteLine();
                 //}
+
+
 
                 //if (string.IsNullOrWhiteSpace(repository))
                 //{
