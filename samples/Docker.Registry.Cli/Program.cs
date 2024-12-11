@@ -11,17 +11,6 @@ namespace Docker.Registry.Cli
 {
     class Program
     {
-        static void Main(string[] args)
-        {
-            try
-            {
-                TestAsync().GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-               
-            }
-        }
 
         static async Task TestAsync()
         {

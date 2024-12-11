@@ -1,19 +1,4 @@
-﻿// Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
-using Docker.Registry.DotNet.Application.Authentication;
+﻿using Docker.Registry.DotNet.Application.Authentication;
 
 using FluentAssertions;
 

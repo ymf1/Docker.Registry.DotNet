@@ -121,11 +121,5 @@ public class RegistryClientConfiguration
                 this.DefaultTimeout));
     }
 
-    [Obsolete("Use Configuration.SetAuthenticationProvider() instead.")]
-    public IRegistryClient CreateClient(AuthenticationProvider authenticationProvider)
-    {
-        this.SetAuthenticationProvider(authenticationProvider);
-
-        return this.CreateClient();
-    }
+   
 }
