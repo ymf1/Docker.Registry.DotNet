@@ -1,0 +1,57 @@
+
+============
+GetCatalog begin
+
+repository=k8sapi
+repository=yimf/k8sap/ai
+repository=yimf/k8sapi
+
+GetCatalog end
+
+============
+ListTags begin
+
+repository=k8sapi
+tags.Name=k8sapi,
+imageTag.Value=latest,
+
+repository=yimf/k8sap/ai
+tags.Name=yimf/k8sap/ai,
+imageTag.Value=latest,
+
+repository=yimf/k8sapi
+tags.Name=yimf/k8sapi,
+imageTag.Value=latest,
+
+
+ListTags end
+
+============
+GetCatalog begin
+
+repository=k8sapi
+repository=yimf/k8sap/ai
+repository=yimf/k8sapi
+
+GetCatalog end
+
+============
+ListTagsByDigests begin
+
+repository=k8sapi
+tags.Name=k8sapi,
+digestTag.Digest.Value=sha256:7a5d2f3a85199a0d1719cd751d7d7696365b9c9e7fa8222150211d8a7b6235f7,
+imageTag.Value=latest,
+
+repository=yimf/k8sap/ai
+tags.Name=yimf/k8sap/ai,
+digestTag.Digest.Value=sha256:1a75e55c98f4b7096fe1e27c106a6160bedeb1998775ba85cb078c6e29880136,
+imageTag.Value=latest,
+
+repository=yimf/k8sapi
+tags.Name=yimf/k8sapi,
+digestTag.Digest.Value=sha256:1a75e55c98f4b7096fe1e27c106a6160bedeb1998775ba85cb078c6e29880136,
+imageTag.Value=latest,
+
+
+ListTagsByDigests end

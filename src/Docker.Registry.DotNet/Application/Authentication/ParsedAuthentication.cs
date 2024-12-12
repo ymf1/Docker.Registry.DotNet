@@ -1,18 +1,4 @@
 ﻿
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
 namespace Docker.Registry.DotNet.Application.Authentication;
 
 internal class ParsedAuthentication(string? realm, string? service, string? scope)

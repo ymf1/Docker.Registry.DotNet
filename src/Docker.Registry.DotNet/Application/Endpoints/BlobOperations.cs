@@ -1,40 +1,11 @@
 ﻿
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
-
-
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
 using Docker.Registry.DotNet.Domain.Blobs;
 
 namespace Docker.Registry.DotNet.Application.Endpoints;
 
 internal class BlobOperations(RegistryClient client) : IBlobOperations
 {
+
     public async Task<GetBlobResponse> GetBlob(
         string name,
         string digest,
@@ -78,4 +49,5 @@ internal class BlobOperations(RegistryClient client) : IBlobOperations
 
         return response.StatusCode == HttpStatusCode.OK;
     }
+
 }

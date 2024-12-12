@@ -1,18 +1,4 @@
-﻿// Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
+﻿
 using Docker.Registry.DotNet.Domain.ImageReferences;
 using Docker.Registry.DotNet.Domain.Manifests;
 
@@ -25,8 +11,7 @@ internal class ManifestOperations(RegistryClient client) : IManifestOperations
         {
             {
                 "Accept",
-                $"{ManifestMediaTypes.ManifestSchema1}, {ManifestMediaTypes.ManifestSchema2}, {
-                    ManifestMediaTypes.ManifestList}, {ManifestMediaTypes.ManifestSchema1Signed}"
+                $"{ManifestMediaTypes.ManifestSchema1}, {ManifestMediaTypes.ManifestSchema2}, {ManifestMediaTypes.ManifestList}, {ManifestMediaTypes.ManifestSchema1Signed}, {ManifestMediaTypes.OciImageIndexV1}"
             }
         };
 
@@ -147,12 +132,20 @@ internal class ManifestOperations(RegistryClient client) : IManifestOperations
         ImageReference reference,
         CancellationToken token)
     {
-        return await client.MakeRequest(
-            HttpMethod.Get,
-            $"{client.RegistryVersion}/{name}/manifests/{reference}",
-            null,
-            _manifestHeaders,
-            token: token);
+
+        try {
+
+            var url = $"{client.RegistryVersion}/{name}/manifests/{reference}";
+            return await client.MakeRequest(
+                HttpMethod.Get,
+               url,
+                null,
+                _manifestHeaders,
+                token: token);
+        } catch (Exception ee) 
+        {
+            throw new Exception("see inner",ee);
+        }
     }
 
     private string GetContentType(string contentTypeHeader, string manifest)

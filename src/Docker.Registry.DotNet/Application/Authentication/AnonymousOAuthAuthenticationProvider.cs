@@ -1,18 +1,4 @@
 ﻿
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
 using Docker.Registry.DotNet.Application.OAuth;
 
 namespace Docker.Registry.DotNet.Application.Authentication;
@@ -57,4 +43,5 @@ public class AnonymousOAuthAuthenticationProvider : AuthenticationProvider
         //Set the header
         request.Headers.Authorization = new AuthenticationHeaderValue(Schema, token.Token);
     }
+
 }

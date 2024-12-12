@@ -1,18 +1,4 @@
 ﻿
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
 namespace Docker.Registry.DotNet.Application.Authentication;
 
 /// <summary>

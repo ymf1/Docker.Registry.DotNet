@@ -1,18 +1,4 @@
 ﻿
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
 namespace Docker.Registry.DotNet.Application.Authentication;
 
 internal static class AuthenticateParser

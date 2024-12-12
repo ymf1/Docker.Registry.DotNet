@@ -62,4 +62,7 @@ public static class ManifestMediaTypes
     ///     Plugin config JSON
     /// </summary>
     public const string PluginConfigJson = "application/vnd.docker.plugin.v1+json";
+
+    public const string OciImageIndexV1 = "application/vnd.oci.image.index.v1+json";
+
 }

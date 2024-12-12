@@ -1,34 +1,5 @@
 ﻿
 
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
-
-
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
 using Docker.Registry.DotNet.Application.QueryStrings;
 using Docker.Registry.DotNet.Domain.Catalogs;
 
@@ -40,6 +11,7 @@ internal class CatalogOperations(RegistryClient client) : ICatalogOperations
         CatalogParameters? parameters = null,
         CancellationToken token = default)
     {
+
         parameters ??= new CatalogParameters();
 
         var queryParameters = new QueryString();
@@ -53,5 +25,6 @@ internal class CatalogOperations(RegistryClient client) : ICatalogOperations
             token: token);
 
         return client.JsonSerializer.DeserializeObject<CatalogResponse>(response.Body);
+    
     }
 }

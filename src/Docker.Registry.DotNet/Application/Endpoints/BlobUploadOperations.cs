@@ -1,18 +1,4 @@
 ﻿
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
 using Docker.Registry.DotNet.Application.QueryStrings;
 using Docker.Registry.DotNet.Domain.Blobs;
 using Docker.Registry.DotNet.Domain.ImageReferences;
@@ -21,6 +7,7 @@ namespace Docker.Registry.DotNet.Application.Endpoints;
 
 internal class BlobUploadOperations(RegistryClient client) : IBlobUploadOperations
 {
+
     public async Task<ResumableUpload> StartUploadBlob(
         string name,
         CancellationToken token = default)
@@ -242,4 +229,6 @@ internal class BlobUploadOperations(RegistryClient client) : IBlobUploadOperatio
             throw;
         }
     }
+
+
 }

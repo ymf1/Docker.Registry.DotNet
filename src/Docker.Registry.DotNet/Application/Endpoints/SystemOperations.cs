@@ -1,34 +1,4 @@
 ﻿
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
-
-
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
 namespace Docker.Registry.DotNet.Application.Endpoints;
 
 internal class SystemOperations(RegistryClient client) : ISystemOperations

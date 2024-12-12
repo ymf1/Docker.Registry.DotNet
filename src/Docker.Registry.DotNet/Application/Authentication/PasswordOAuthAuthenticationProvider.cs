@@ -1,18 +1,4 @@
 ﻿
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
 using Docker.Registry.DotNet.Application.OAuth;
 
 namespace Docker.Registry.DotNet.Application.Authentication;

@@ -1,18 +1,4 @@
-﻿// Copyright 2017-2024 Rich Quackenbush, Jaben Cargman
-
-// 
-
-
-
-// 
-
-// 
-
-
-
-
-
-
+﻿
 using Docker.Registry.DotNet.Application.QueryStrings;
 using Docker.Registry.DotNet.Domain.ImageReferences;
 
